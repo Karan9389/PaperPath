@@ -12,14 +12,13 @@ const userSchema = new mongoose.Schema({
     },
     password: { 
         type: String, 
-        required: true, 
-        default: '' 
+        required: true
     },
-    varifyOtp: { 
-        type: Number, 
+    verifyOtp: { 
+        type: String, // String handles leading zeros safely (e.g., "012345")
         default: null 
     },
-    varifyOtpExpireAt: { 
+    verifyOtpExpireAt: { 
         type: Number, 
         default: 0 
     },
@@ -28,14 +27,20 @@ const userSchema = new mongoose.Schema({
         default: false 
     },
     resetOtp: { 
-        type: Number, 
+        type: String, 
         default: null 
     },
-    resetOtpExprireAt: { 
+    resetOtpExpireAt: { 
         type: Number, 
         default: 0 
     },
-})
+    targetLevel: {
+        type: String,
+        enum: ['beginner', 'intermediate', 'advanced'], // Keeps your data clean
+        default: 'beginner' // Safe default for your specific MVP requirements
+    }
+}, { timestamps: true }); // Automatically creates createdAt and updatedAt fields
 
-const userModel = mongoose.model.user || mongoose.model('user', userSchema)
+const userModel = mongoose.models.user || mongoose.model('user', userSchema);
+
 export default userModel;
