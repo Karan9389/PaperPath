@@ -1,0 +1,23 @@
+{
+  "name": "paperpath",
+  "version": "1.0.0",
+  "description": "This project for filtering research papers",
+  "homepage": "https://github.com/Karan9389/PaperPath.gi#readme",
+  "bugs": {
+    "url": "https://github.com/Karan9389/PaperPath.gi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Karan9389/PaperPath.gi.git"
+  },
+  "license": "ISC",
+  "author": "Karan Kumar and Aditya Kushwaha",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
