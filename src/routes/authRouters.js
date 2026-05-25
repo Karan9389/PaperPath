@@ -1,5 +1,5 @@
 import express from 'express';
-import {registerUser, loginUser} from '../controllers/authController.js';
+import {registerUser, loginUser, getUserProfile} from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -7,4 +7,6 @@ const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
+//Private route (Middleware protect profile route)
+router.get('/profile',protect, getUserProfile);
 export default router;

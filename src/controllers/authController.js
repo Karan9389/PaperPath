@@ -15,13 +15,13 @@ const registerUser = async (req, res) => {
         if (userExist) {
             return res.status(400).json({ message: 'User already exist ' });
         }
-        //if not exist then create a new user.\
+        //if not exist then create a new user.
         const user = await User.create({
             name,
             email,
             password
         });
-        //if successful reuturn user + token.
+        //if successful return user + token.
         if(user){
             res.status(201).json({
                 _id: user._id,
@@ -57,4 +57,14 @@ const loginUser = async (req, res) => {
         res.status.json({message : error.message});
     }
 }
-export { registerUser, loginUser };
+
+const getUserProfile = async (req, res) => {
+    const user = {
+        _id : req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role
+    }
+    res.json(user);
+}
+export { registerUser, loginUser, getUserProfile };

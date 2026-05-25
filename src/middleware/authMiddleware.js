@@ -1,0 +1,29 @@
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
+
+const protect = async (req, res, next) => {
+    let token;
+
+    //1. Finding the Token in the Request
+    if(req.headers.authorization && req.headers.authorization.startWith('Bearer')){
+        try{
+            //2. Extracting the Token
+            token = req.headers.authorization.split(' ')[1];
+
+            //3. Verifying the Token
+            const decoded = jwt.verify(token, proxess.env.User.JWT_SECRET);
+
+            //4. Moe on to the next acutal contoller funition
+            next();
+        }catch(error){
+            console.error(error);
+            res.status(401).json({message : "Not authorized, tokenfailed"});
+        }
+    }
+    if(!token){
+        res.status(401).json({message : 'Not authoried, no token'});
+
+    }
+    
+};
+export {protect};
