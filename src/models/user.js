@@ -38,7 +38,21 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['beginner', 'intermediate', 'advanced'], // Keeps your data clean
         default: 'beginner' // Safe default for your specific MVP requirements
-    }
+    },
+    savedPapers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Paper'
+    }],
+    readHistory: [{
+        paper: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Paper'
+        },
+        readAt: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 }, { timestamps: true }); // Automatically creates createdAt and updatedAt fields
 
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);
