@@ -4,7 +4,26 @@ import User from '../models/User.js';
 // @route   POST /api/users/save/:paperId
 // @access  Private
 const toggleSavePaper = async (req, res) => {
-  //i will write logic later ok aditya
+    try {
+        const user = await User.findById(req.user._id);
+        const paperId = req.params.paperId;
+
+        // Check if the paper is already saved
+        const isSaved = user.savedPapers.includes(paperId);
+
+        if (isSaved) {
+            // Unsave it (remove from array)
+            user.savedPapers = user.savedPapers.filter(id => id.toString() !== paperId);
+        } else {
+            // Save it (add to array)
+            user.savedPapers.push(paperId);
+        }
+
+        await user.save();
+        res.json({ savedPapers: user.savedPapers });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 // @desc    Add a paper to reading history
