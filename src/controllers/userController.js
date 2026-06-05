@@ -30,7 +30,19 @@ const toggleSavePaper = async (req, res) => {
 // @route   POST /api/users/history/:paperId
 // @access  Private
 const addPaperToHistory = async (req, res) => {
-    //i will write logic later ok aditya
+    try {
+        const user = await User.findById(req.user._id);
+        const paperId = req.params.paperId;
+        // Add to history (avoid duplicates)
+        if (!user.history.includes(paperId)) {
+            user.history.push(paperId);
+            await user.save();
+        }
+        res.json({ history: user.history });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+
 };
 
 // @desc    Get the user's dashboard data (saved papers & history)
