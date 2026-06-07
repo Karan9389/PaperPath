@@ -13,8 +13,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+//api redirect to authentication routes
 app.use('/api/auth', authRouters);
+
+//api redirect to paper routes
 app.use('/api/papers', paperRoutes);
+
+//api redirect to user routes
 app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) =>{

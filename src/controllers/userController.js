@@ -1,21 +1,21 @@
-import User from '../models/User.js';
+import User from '../models/user.js';
 
 // @desc    Toggle saving/unsaving a paper
 // @route   POST /api/users/save/:paperId
 // @access  Private
-const toggleSavePaper = async (req, res) => {
-    try {
+const toggleSavePaper = async (req, res) =>{
+    try{
         const user = await User.findById(req.user._id);
+        //extracting peper id from the api request papameters 
         const paperId = req.params.paperId;
 
-        // Check if the paper is already saved
         const isSaved = user.savedPapers.includes(paperId);
 
         if (isSaved) {
-            // Unsave it (remove from array)
+            //Unsave it (remove from array)
             user.savedPapers = user.savedPapers.filter(id => id.toString() !== paperId);
-        } else {
-            // Save it (add to array)
+        }else{
+            //save it (add to array)
             user.savedPapers.push(paperId);
         }
 
@@ -33,12 +33,14 @@ const addPaperToHistory = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
         const paperId = req.params.paperId;
-        // Add to history (avoid duplicates)
-        if (!user.history.includes(paperId)) {
-            user.history.push(paperId);
-            await user.save();
-        }
-        res.json({ history: user.history });
+
+        //Remove it if it's already in history so we can move it to the top with a new data
+        user.readHistory = user.readHistory.filter(item => item.paper.UsertoString() !== paperId);
+
+        //add to the beginning of the array
+        user.readHistory.unshift({paper : paperId, readAt: Date.now()});
+        await user.save();
+        res.json({ readHistory: user.readHistory });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -49,7 +51,22 @@ const addPaperToHistory = async (req, res) => {
 // @route   GET /api/users/library
 // @access  Private
 const getUserLibrary = async (req, res) => {
-    //i will write logic later ok aditya
+    try{
+        //instead of returning the id of peper it returen and populate the liberary of user with paper object
+        const user = req.User.findById(req.usr._id)
+            .populate('savedPapers', 'title difficulty Level')
+            .populate('readHistory', 'title difficultyLevel');
+
+        if(!user){
+            return res.status(404).json({message : 'user not found'});
+        }
+        res.json({
+            savedPapers : user.savedPapers,
+            readHistory : user.readHistory
+        });
+    }catch(error){
+        res.status(500).json({messaage : error.messaage});
+    }
 };
 
 export { toggleSavePaper, addPaperToHistory, getUserLibrary };
