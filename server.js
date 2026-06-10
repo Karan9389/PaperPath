@@ -4,6 +4,7 @@ import connectDB from './src/config/db.js';
 import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
 import userRouters from './src/routes/userRoutes.js';
+import aiRoute from './src/routes/aiRoutes.js'
 
 
 dotenv.config();
@@ -21,6 +22,9 @@ app.use('/api/papers', paperRoutes);
 
 //api redirect to user routes
 app.use('/api/users', userRoutes);
+
+//api redirect to gemini api services
+app.use('/api/ai', aiRoutes);
 
 app.get('/', (req, res) =>{
     res.send('API is running');

@@ -1,0 +1,9 @@
+import express from 'express';
+import { testGeminiConnection } from '../controllers/aiController';
+
+//router that will direct the request to the gemini function present in controllers that is powerd by the imported function in aiServies.js
+
+const router = express.Router();
+router.post('/test', testGeminiConnection);
+
+export default router;
