@@ -1,5 +1,5 @@
 // src/controllers/aiController.js
-import llm from '../services/geminiService.js';
+import llm from '../services/geminiServices.js';
 
 // @desc    Test the Gemini API connection
 // @route   POST /api/ai/test
