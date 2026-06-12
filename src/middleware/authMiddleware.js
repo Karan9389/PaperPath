@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js';
+import User from '../models/user.js';
 
 const protect = async (req, res, next) => {
     let token;
@@ -11,8 +11,7 @@ const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
 
             //3. Verifying the Token
-            const decoded = jwt.verify(token, proxess.env.User.JWT_SECRET);
-
+            const decoded = jwt.verify(token, process.env.User.JWT_SECRET);
             //4. Moe on to the next acutal contoller funition
             next();
         }catch(error){

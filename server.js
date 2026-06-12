@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
 import userRouters from './src/routes/userRoutes.js';
 import aiRoute from './src/routes/aiRoutes.js'
+// import paperRoutes from './src/routes/'
+
 
 
 dotenv.config();
@@ -17,14 +19,11 @@ app.use(express.json());
 //api redirect to authentication routes
 app.use('/api/auth', authRouters);
 
-//api redirect to paper routes
-app.use('/api/papers', paperRoutes);
-
 //api redirect to user routes
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRouters);
 
 //api redirect to gemini api services
-app.use('/api/ai', aiRoutes);
+app.use('/api/ai', aiRoute);
 
 app.get('/', (req, res) =>{
     res.send('API is running');

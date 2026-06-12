@@ -56,7 +56,6 @@ const getUserLibrary = async (req, res) => {
         const user = req.User.findById(req.usr._id)
             .populate('savedPapers', 'title difficulty Level')
             .populate('readHistory', 'title difficultyLevel');
-
         if(!user){
             return res.status(404).json({message : 'user not found'});
         }
