@@ -24,9 +24,9 @@ console.log("Gemini API key loaded:", !!apiKey);
 // We initialize the LLM here so we can import this single instance
 // anywhere in our app without having to reconfigure it every time.
 const llm = new ChatGoogleGenerativeAI({
-    model,
+    model: "gemini-1.5-flash", // `model` is required by @langchain/google-genai
     maxOutputTokens: 2048,
     apiKey,
 });
 
-export default llm; 
+export default llm;

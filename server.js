@@ -3,8 +3,11 @@ import cors from 'cors';
 import connectDB from './src/config/db.js';
 import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
-import userRoutes from './src/routes/userRoutes.js';
-import aiRoutes from './src/routes/aiRoutes.js';
+import userRouters from './src/routes/userRoutes.js';
+import aiRoute from './src/routes/aiRoutes.js'
+// import paperRoutes from './src/routes/'
+
+
 
 dotenv.config();
 connectDB();
@@ -16,11 +19,11 @@ app.use(express.json());
 // api redirect to authentication routes
 app.use('/api/auth', authRouters);
 
-// api redirect to user routes
-app.use('/api/users', userRoutes);
+//api redirect to user routes
+app.use('/api/users', userRouters);
 
-// api redirect to gemini api services
-app.use('/api/ai', aiRoutes);
+//api redirect to gemini api services
+app.use('/api/ai', aiRoute);
 
 app.get('/', (req, res) =>{
     res.send('API is running');

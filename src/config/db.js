@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import dns from "dns";
+// This block of code is a custom utility function designed to 
+// connect a Node.js application to a MongoDB database using the Mongoose 
+// Object Data Modeling (ODM) library.
 
 const connectDB = async () =>{
     try{

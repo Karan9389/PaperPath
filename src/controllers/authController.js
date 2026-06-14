@@ -66,5 +66,6 @@ const getUserProfile = async (req, res) => {
         role: req.user.role
     }
     res.json(user);
-}
+};
+
 export { registerUser, loginUser, getUserProfile };

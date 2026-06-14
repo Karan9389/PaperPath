@@ -3,6 +3,7 @@ import { toggleSavePaper, addPaperToHistory, getUserLibrary } from '../controlle
 import { protect } from '../middleware/authmiddleware.js';
 
 const router = express.Router();
+
 router.get('/library', protect, getUserLibrary);
 router.post('/save/:paperId', protect, toggleSavePaper);
 router.post('/history/:paperId', protect, addPaperToHistory);
