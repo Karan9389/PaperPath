@@ -2,16 +2,23 @@ import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 
 //Helper function to generate JSON WEB TOKEN.
+// src/controllers/authController.js
 const generateToken = (id) => {
-    //this method use the jwt key and expire with in 30 days.
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const secret = process.env.JWT_SECRET;
+    
+    // Safety check to alert you exactly where the issue lies
+    if (!secret) {
+        throw new Error("CRITICAL CONFIG ERROR: process.env.JWT_SECRET is not defined!");
+    }
+    
+    return jwt.sign({ id }, secret, { expiresIn: '30d' });
 }
 
 const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         //check if the user already exist with the email or not.
-        const userExist = User.findOne({ email });
+        const userExist = await User.findOne({ email });
         if (userExist) {
             return res.status(400).json({ message: 'User already exist ' });
         }
