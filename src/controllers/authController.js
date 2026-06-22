@@ -68,4 +68,5 @@ const getUserProfile = async (req, res) => {
     res.json(user);
 };
 
+
 export { registerUser, loginUser, getUserProfile };

@@ -4,7 +4,7 @@ import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-//divert the requests to the controller functions as per the api endpoints.✌️
+//divert the requests to the controller functions as per the api endpoints.
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 
