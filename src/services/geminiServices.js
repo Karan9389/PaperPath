@@ -1,34 +1,130 @@
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import dotenv from 'dotenv';
+// src/services/geminiServices.js
+import { GoogleGenAI } from '@google/genai';
+import { createRequire } from 'module';
+import fs from 'fs'; 
+import csv from 'csv-parser';
+import paperModel from '../models/paper.js';
 
-dotenv.config();
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 
-const apiKey = process.env.GOOGLE_API_KEY ?? process.env.GEMINI_API_KEY;
+const getLlmInstance = () => {
+    if (!process.env.GEMINI_API_KEY) {
+        throw new Error("Missing GEMINI_API_KEY inside your environment configurations (.env).");
+    }
+    return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+};
 
-if (!apiKey) {
-    throw new Error('Missing API key. Set GOOGLE_API_KEY in your environment.');
-}
+const chunkText = (text, maxLength = 1000, overlap = 200) => {
+    const chunks = [];
+    let i = 0;
+    while (i < text.length) {
+        chunks.push(text.substring(i, i + maxLength));
+        i += (maxLength - overlap);
+    }
+    return chunks;
+};
 
-const requestedModel = process.env.GEMINI_MODEL?.trim();
+// 🔥 ENGINE 1: PDF PROCESSING & CHUNKING
+export const processPdfAndIngest = async (pdfBuffer, documentTitle) => {
+    let rawText = "";
+    try {
+        const parsedData = await pdfParse(pdfBuffer);
+        rawText = parsedData.text;
+    } catch (e) {
+        rawText = pdfBuffer.toString('utf-8');
+    }
 
-const defaultModel = "gemini-3.5-flash"; 
+    const textChunks = chunkText(rawText);
+    const formattedChunks = [];
+    const llm = getLlmInstance();
 
-const model = requestedModel && requestedModel !== "gemini-1.5-flash" && requestedModel !== "gemini-1.5-pro"
-    ? requestedModel
-    : defaultModel;
+    console.log(`🤖 Processing ${textChunks.length} chunks via gemini-embedding-2...`);
 
-if (requestedModel === "gemini-1.5-flash") {
-    console.warn("GEMINI_MODEL=gemini-1.5-flash is unsupported for generateContent on this API version; using", defaultModel);
-}
+    for (let index = 0; index < textChunks.length; index++) {
+        const chunkTextContent = textChunks[index];
+        
+        const result = await llm.models.embedContent({
+            model: "gemini-embedding-2", 
+            contents: chunkTextContent,
+            config: {
+                outputDimensionality: 768
+            }
+        });
 
-console.log("Using Gemini model:", model);
-console.log("Gemini API key loaded:", !!apiKey);
+        // 🎯 THE ACTUAL FIX: Accessing the plural array correctly 
+        formattedChunks.push({
+            chunkId: `chunk_${index}`,
+            text: chunkTextContent,
+            embedding: result.embeddings[0].values
+        });
+    }
 
-// We initialize the LLM here so we can import this single instance
-// anywhere in our app without having to reconfigure it every time.
-const llm = new ChatGoogleGenerativeAI({
-    model: model,
-    maxOutputTokens: 2048,
-    apiKey,
-});
-export default llm;
+    return await paperModel.create({
+        title: documentTitle,
+        difficulty: 'beginner',
+        chunks: formattedChunks
+    });
+};
+
+// 🔥 ENGINE 2: CSV ROW-BY-ROW STREAMING
+export const processCsvStream = async (filePath) => {
+    return new Promise((resolve, reject) => {
+        let processedCount = 0;
+        const TARGET_ROWS_LIMIT = 5; 
+        const llm = getLlmInstance();
+        const stream = fs.createReadStream(filePath).pipe(csv());
+
+        stream.on('data', async (row) => {
+            try {
+                stream.pause();
+                if (processedCount >= TARGET_ROWS_LIMIT) {
+                    stream.destroy();
+                    return;
+                }
+
+                const title = row.title || "Untitled Paper";
+                const abstract = row.abstract || "";
+                const authors = row.authors || "Unknown Author";
+
+                if (abstract && abstract.trim().length > 0) {
+                    const textToEmbed = `Title: ${title}. Authors: ${authors}. Abstract: ${abstract}.`;
+                    
+                    const result = await llm.models.embedContent({
+                        model: "gemini-embedding-2",
+                        contents: textToEmbed,
+                        config: {
+                            outputDimensionality: 768
+                        }
+                    });
+
+                    // 🎯 THE ACTUAL FIX: Accessing the plural array correctly here as well
+                    await paperModel.create({
+                        title,
+                        authors,
+                        abstract,
+                        difficulty: 'beginner',
+                        embedding: result.embeddings[0].values
+                    });
+
+                    processedCount++;
+                    console.log(`✅ Smart Ingested [CSV Row ${processedCount}]: ${title.substring(0, 20)}...`);
+                }
+                stream.resume();
+            } catch (err) {
+                stream.destroy();
+                reject(err);
+            }
+        });
+
+        stream.on('close', () => {
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            resolve({ success: true, count: processedCount });
+        });
+
+        stream.on('error', (err) => {
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+            reject(err);
+        });
+    });
+};

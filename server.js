@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
 import userRouters from './src/routes/userRoutes.js';
 import aiRoute from './src/routes/aiRoutes.js'
+import paperRouter from './src/routes/paperRoutes.js'; // 1. Import your new router layer
 // import paperRoutes from './src/routes/'
 
 
@@ -16,8 +17,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
+
 // api redirect to authentication routes
 app.use('/api/auth', authRouters);
+app.use('/api/papers', paperRouter); // Everything handling papers now prefixes with /api/papers
 
 //api redirect to user routes
 app.use('/api/users', userRouters);
