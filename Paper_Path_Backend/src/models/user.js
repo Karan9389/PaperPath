@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema({
     }]
 }, { timestamps: true }); // Automatically creates createdAt and updatedAt fields
 
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    return this.password === enteredPassword;
+};
+
 const userModel = mongoose.models.user || mongoose.model('user', userSchema);
 
 export default userModel;
