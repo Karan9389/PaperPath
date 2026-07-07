@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bookmark, History, Library, Loader2, Sparkles } from 'lucide-react';
 import PaperCard from './PaperCard';
+import UploadComponent from './UploadComponent';
 
 export default function DashboardView({ papers, savedPapers, readHistory, isLoading, onOpenPaper, onToggleSave }) {
   const [activeTab, setActiveTab] = useState('explore');
@@ -35,6 +36,10 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
           </button>
         </div>
       </div>
+
+      {/* --- UPLOAD COMPONENT INSERTED HERE --- */}
+      <UploadComponent onUploadSuccess={() => window.location.reload()} />
+      {/* -------------------------------------- */}
 
       {activeTab === 'explore' ? (
         <div>

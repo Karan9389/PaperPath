@@ -7,9 +7,31 @@ export const MOCK_PAPERS = [
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
-
+const TOKEN_STORAGE_KEY = 'paper_path_token';
 
 const delay = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getStoredToken = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage.getItem(TOKEN_STORAGE_KEY);
+};
+
+const persistToken = (result) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const token = result?.token;
+
+  if (token) {
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+  } else {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
+};
 
 async function request(endpoint, { method = 'GET', body, mockData, delayMs = 800 } = {}) {
   if (USE_MOCK_API) {
