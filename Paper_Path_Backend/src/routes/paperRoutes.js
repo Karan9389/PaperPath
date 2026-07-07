@@ -1,80 +1,37 @@
-// src/routes/paperRoutes.js
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { createRequire } from 'module';
 import { processCsvStream, processPdfAndIngest } from '../services/geminiServices.js';
 import paperModel from '../models/paper.js';
 
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
-
 const router = express.Router();
-
-// --- DUMMY DATA FOR FRONTEND UI (From your teammate) ---
-const fallbackPaperContent = 'This sample paper explains the basics of transformer models and how attention mechanisms help language models process information effectively.';
-
-const getSeededPapers = () => {
-    const uploadFiles = fs.existsSync(path.resolve(process.cwd(), 'uploads'))
-        ? fs.readdirSync(path.resolve(process.cwd(), 'uploads')).filter((name) => name && !name.startsWith('.'))
-        : [];
-
-    const defaultPapers = [
-        {
-            _id: 'sample-paper-1',
-            title: 'Attention Is All You Need',
-            difficultyLevel: 'Advanced',
-            abstract: 'The dominant sequence transduction models are based on complex recurrent or convolutional neural networks and attention mechanisms...',
-            tags: ['AI', 'Transformers'],
-            content: fallbackPaperContent,
-        }
-    ];
-
-    const uploadedPaperEntries = uploadFiles.slice(0, 8).map((fileName, index) => ({
-        _id: `uploaded-paper-${index + 1}`,
-        title: `Uploaded Paper ${index + 1}`,
-        difficultyLevel: index % 2 === 0 ? 'Intermediate' : 'Beginner',
-        abstract: `Paper imported from the uploads folder. File: ${fileName}`,
-        tags: ['Uploaded', 'Sample', 'Research'],
-        content: `This entry is seeded from the uploaded file ${fileName} so it appears for all users by default.`,
-    }));
-
-    return [...defaultPapers, ...uploadedPaperEntries];
-};
-
-const getSamplePaperContent = async () => {
-    const samplePdfPath = path.resolve(process.cwd(), 'PaperPath Project.pdf');
-    if (!fs.existsSync(samplePdfPath)) return fallbackPaperContent;
-    try {
-        const data = await pdfParse(samplePdfPath);
-        const extractedText = (data?.text || '').trim();
-        return extractedText.length > 200 ? extractedText.slice(0, 4000) : fallbackPaperContent;
-    } catch (error) {
-        return fallbackPaperContent;
-    }
-};
-
 const upload = multer({ 
     dest: 'uploads/',
     limits: { fileSize: 500 * 1024 * 1024 } 
 });
 
-// --- GET ROUTES ---
+// --- REAL MONGODB GET ROUTES ---
 router.get('/', async (req, res) => {
-    const sampleContent = await getSamplePaperContent();
-    const seededPapers = getSeededPapers().map((paper) => ({
-        ...paper,
-        content: paper._id === 'sample-paper-1' ? sampleContent : paper.content,
-    }));
-    res.json({ data: seededPapers });
+    try {
+        // Fetch the newest 50 papers from MongoDB, excluding the heavy vector embeddings
+        const papers = await paperModel.find({}, '-chunks').sort({ createdAt: -1 }).limit(50);
+        res.json({ data: papers });
+    } catch (error) {
+        console.error("❌ Error fetching papers:", error);
+        res.status(500).json({ message: "Failed to load papers." });
+    }
 });
 
 router.get('/:paperId', async (req, res) => {
-    const sampleContent = await getSamplePaperContent();
-    const paper = getSeededPapers().find((item) => item._id === req.params.paperId);
-    if (!paper) return res.status(404).json({ message: 'Paper not found' });
-    res.json({ data: { ...paper, content: paper._id === 'sample-paper-1' ? sampleContent : paper.content } });
+    try {
+        const paper = await paperModel.findById(req.params.paperId, '-chunks');
+        if (!paper) return res.status(404).json({ message: 'Paper not found' });
+        res.json({ data: paper });
+    } catch (error) {
+        console.error("❌ Error fetching paper details:", error);
+        res.status(500).json({ message: "Failed to load paper details." });
+    }
 });
 
 // 🤖 LOCAL OLLAMA CHAT ROUTE

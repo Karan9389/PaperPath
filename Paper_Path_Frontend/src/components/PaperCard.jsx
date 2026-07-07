@@ -29,7 +29,7 @@ export default function PaperCard({ paper, isSaved, onOpen, onToggleSave }) {
         <p className="text-sm text-slate-600 line-clamp-3 mb-4">{paper.abstract}</p>
 
         <div className="flex flex-wrap gap-2 mt-auto">
-          {paper.tags.map((tag) => (
+         {(paper.tags || []).map((tag, index) => (
             <span key={tag} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-md">
               {tag}
             </span>

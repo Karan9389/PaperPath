@@ -21,4 +21,4 @@ const paperSchema = new mongoose.Schema({
     embedding: { type: [Number] }
 }, { timestamps: true });
 
-export default mongoose.model('Paper', paperSchema);
+export default mongoose.model('Paper', paperSchema, 'paper');

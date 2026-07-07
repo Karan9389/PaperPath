@@ -3,7 +3,8 @@ import Navbar from './components/Navbar';
 import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
-import { authService, libraryService, paperService, MOCK_PAPERS } from './services/api';
+// Removed MOCK_PAPERS from the import!
+import { authService, libraryService, paperService } from './services/api';
 
 export default function App() {
   const [view, setView] = useState('login');
@@ -65,7 +66,8 @@ export default function App() {
         libraryService.getLibrary(),
       ]);
 
-      const papersResult = fetchedPapers.status === 'fulfilled' ? fetchedPapers.value : MOCK_PAPERS;
+      // Changed fallback from MOCK_PAPERS to an empty array []
+      const papersResult = fetchedPapers.status === 'fulfilled' ? fetchedPapers.value : [];
       const libraryResult = libraryData.status === 'fulfilled'
         ? libraryData.value
         : { savedPapers: [], readHistory: [] };
@@ -75,7 +77,8 @@ export default function App() {
       setReadHistory(libraryResult.readHistory || []);
     } catch (error) {
       console.error('Could not load dashboard data', error);
-      setPapers(MOCK_PAPERS);
+      // Changed fallback from MOCK_PAPERS to an empty array []
+      setPapers([]);
       setSavedPapers([]);
       setReadHistory([]);
     } finally {
