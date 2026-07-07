@@ -8,10 +8,7 @@ import aiRoute from './src/routes/aiRoutes.js'
 import paperRouter from './src/routes/paperRoutes.js'; // 1. Import your new router layer
 // import paperRoutes from './src/routes/'
 
-
-
 dotenv.config();
-connectDB();
 
 const app = express();
 app.use(cors());
@@ -33,8 +30,17 @@ app.use('/api/ai', aiRoute);
 app.get('/', (req, res) =>{
     res.send('API is running');
 });
-const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () =>{
-    console.log(`Server is running on port ${PORT}`);
-})
+const startServer = async () => {
+    const dbReady = await connectDB();
+    if (!dbReady) {
+        console.warn('Starting server without a database connection. Routes that depend on MongoDB will be unavailable until the database is reachable.');
+    }
+
+    const PORT = process.env.PORT || 3001;
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+};
+
+startServer();

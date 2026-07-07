@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
-import { authService, libraryService, paperService } from './services/api';
+import { authService, libraryService, paperService, MOCK_PAPERS } from './services/api';
 
 export default function App() {
   const [view, setView] = useState('login');
@@ -60,16 +60,24 @@ export default function App() {
     setIsLoading(true);
 
     try {
-      const [fetchedPapers, libraryData] = await Promise.all([
+      const [fetchedPapers, libraryData] = await Promise.allSettled([
         paperService.list(),
         libraryService.getLibrary(),
       ]);
 
-      setPapers(fetchedPapers);
-      setSavedPapers(libraryData.savedPapers || []);
-      setReadHistory(libraryData.readHistory || []);
+      const papersResult = fetchedPapers.status === 'fulfilled' ? fetchedPapers.value : MOCK_PAPERS;
+      const libraryResult = libraryData.status === 'fulfilled'
+        ? libraryData.value
+        : { savedPapers: [], readHistory: [] };
+
+      setPapers(papersResult);
+      setSavedPapers(libraryResult.savedPapers || []);
+      setReadHistory(libraryResult.readHistory || []);
     } catch (error) {
       console.error('Could not load dashboard data', error);
+      setPapers(MOCK_PAPERS);
+      setSavedPapers([]);
+      setReadHistory([]);
     } finally {
       setIsLoading(false);
     }

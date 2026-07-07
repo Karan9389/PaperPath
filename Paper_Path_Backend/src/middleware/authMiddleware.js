@@ -2,25 +2,27 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 
 const protect = async (req, res, next) => {
-    let token;
+    const authHeader = req.headers.authorization;
 
-    // 1. Finding the token in the request
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (authHeader && authHeader.startsWith('Bearer ')) {
         try {
-            // 2. Extracting the token
-            token = req.headers.authorization.split(' ')[1];
+            const token = authHeader.split(' ')[1];
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'paperpath-secret');
 
-            //3. Verifying the Token
-            const decoded = jwt.verify(token, process.env.User.JWT_SECRET);
-            //4. Moe on to the next acutal contoller funition
-            next();
+            const user = await User.findById(decoded.id).select('-password');
+            if (!user) {
+                return res.status(401).json({ message: 'User not found' });
+            }
+
+            req.user = user;
+            return next();
         } catch (error) {
             console.error(error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
+            return res.status(401).json({ message: 'Not authorized, token failed' });
         }
-    } else {
-        res.status(401).json({ message: 'Not authorized, no token' });
     }
+
+    return res.status(401).json({ message: 'Not authorized, no token' });
 };
 
 export { protect };

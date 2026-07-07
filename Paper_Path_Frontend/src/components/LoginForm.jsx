@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export default function LoginForm({ onSubmit, isLoading, authError }) {
-  const [email, setEmail] = useState('student@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('demo@paperpath.com');
+  const [password, setPassword] = useState('demo1234');
 
   return (
     <form className="mt-8 space-y-6" onSubmit={(e) => onSubmit(e, email, password)}>
@@ -14,7 +14,7 @@ export default function LoginForm({ onSubmit, isLoading, authError }) {
             type="email"
             required
             className="appearance-none rounded-lg relative block w-full px-4 py-3 border border-slate-300 placeholder-slate-400 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all sm:text-sm"
-            placeholder="student@example.com"
+            placeholder="demo@paperpath.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />

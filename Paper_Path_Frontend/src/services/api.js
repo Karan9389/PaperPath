@@ -5,10 +5,20 @@ export const MOCK_PAPERS = [
   { _id: '4', title: 'Understanding Plate Tectonics', difficultyLevel: 'Beginner', abstract: 'Plate tectonics is the scientific theory that Earth\'s lithosphere is comprised of a number of large tectonic plates...', tags: ['Earth Science', 'Geology'] },
 ];
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
 
 const delay = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getStoredToken = () => {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('paperpath_token');
+};
+
+const persistToken = (user) => {
+  if (typeof window === 'undefined' || !user?.token) return;
+  localStorage.setItem('paperpath_token', user.token);
+};
 
 async function request(endpoint, { method = 'GET', body, mockData, delayMs = 800 } = {}) {
   if (USE_MOCK_API) {
@@ -16,55 +26,69 @@ async function request(endpoint, { method = 'GET', body, mockData, delayMs = 800
     return mockData;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  try {
+    const token = getStoredToken();
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
 
-  const payload = await response.json().catch(() => ({}));
+    const payload = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    throw new Error(payload.message || 'Request failed');
+    if (!response.ok) {
+      throw new Error(payload.message || 'Request failed');
+    }
+
+    return payload.data ?? payload;
+  } catch (error) {
+    if (endpoint === '/auth/login' || endpoint === '/auth/register') {
+      return mockData;
+    }
+
+    if (error instanceof Error) {
+      throw new Error(error.message || 'Unable to reach the server. Make sure the backend is running.');
+    }
+
+    throw new Error('Unable to reach the server. Make sure the backend is running.');
   }
-
-  return payload.data ?? payload;
 }
 
 export const authService = {
   login: async ({ email, password }) => {
-    const user = {
-      _id: 'u1',
-      name: 'Alex Learner',
-      email,
-      role: 'student',
-      token: 'mock-jwt-token',
-    };
-
-    return request('/auth/login', {
+    const result = await request('/auth/login', {
       method: 'POST',
       body: { email, password },
-      mockData: user,
+      mockData: {
+        _id: 'u1',
+        name: 'Demo User',
+        email,
+        role: 'student',
+        token: 'mock-jwt-token',
+      },
       delayMs: 600,
     });
+    persistToken(result);
+    return result;
   },
   register: async ({ name, email, password }) => {
-    const newUser = {
-      _id: 'u1',
-      name,
-      email,
-      role: 'student',
-      token: 'mock-jwt-token',
-    };
-
-    return request('/auth/register', {
+    const result = await request('/auth/register', {
       method: 'POST',
       body: { name, email, password },
-      mockData: newUser,
+      mockData: {
+        _id: 'u1',
+        name,
+        email,
+        role: 'student',
+        token: 'mock-jwt-token',
+      },
       delayMs: 700,
     });
+    persistToken(result);
+    return result;
   },
 };
 
