@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import connectDB from './src/config/db.js';
 import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
@@ -8,8 +9,8 @@ import aiRoute from './src/routes/aiRoutes.js'
 import paperRouter from './src/routes/paperRoutes.js'; // 1. Import your new router layer
 // import paperRoutes from './src/routes/'
 
-
-
+const envPath = path.resolve(process.cwd(), '../.env');
+dotenv.config({ path: envPath });
 dotenv.config();
 connectDB();
 

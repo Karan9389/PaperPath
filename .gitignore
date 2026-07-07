@@ -5,3 +5,9 @@ dist/
 *.log
 .DS_Store
 .vscode/extensions
+node_modules
+# Environment variables
+.env
+
+# Datasets
+*.csv

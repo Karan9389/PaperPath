@@ -8,7 +8,9 @@ export const MOCK_PAPERS = [
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true';
 
+
 const delay = (ms = 800) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
 async function request(endpoint, { method = 'GET', body, mockData, delayMs = 800 } = {}) {
   if (USE_MOCK_API) {
@@ -32,6 +34,7 @@ async function request(endpoint, { method = 'GET', body, mockData, delayMs = 800
 
   return payload.data ?? payload;
 }
+
 
 export const authService = {
   login: async ({ email, password }) => {
@@ -68,6 +71,7 @@ export const authService = {
   },
 };
 
+
 export const paperService = {
   list: async () => request('/papers', { mockData: MOCK_PAPERS, delayMs: 700 }),
   getById: async (paperId) => {
@@ -76,7 +80,8 @@ export const paperService = {
   },
 };
 
-export const libraryService = {
+
+ export const libraryService = {
   getLibrary: async () =>
     request('/users/library', {
       mockData: {
@@ -105,7 +110,8 @@ export const libraryService = {
     }),
 };
 
-export const chatService = {
+
+ export const chatService = {
   askQuestion: async ({ paperId, prompt }) => {
     const normalizedPrompt = prompt.toLowerCase();
     const reply = normalizedPrompt.includes('explain like i\'m in class 10')
