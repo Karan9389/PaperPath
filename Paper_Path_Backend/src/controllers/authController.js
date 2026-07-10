@@ -2,9 +2,10 @@ import mongoose from 'mongoose';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 
-const generateToken = (id) => {
+const generateToken = (payload) => {
     const secret = process.env.JWT_SECRET || 'paperpath-secret';
-    return jwt.sign({ id }, secret, { expiresIn: '30d' });
+    const tokenPayload = typeof payload === 'object' && payload !== null ? payload : { id: payload };
+    return jwt.sign(tokenPayload, secret, { expiresIn: '30d' });
 };
 
 const DEMO_CREDENTIALS = {
@@ -14,12 +15,20 @@ const DEMO_CREDENTIALS = {
 
 const fallbackUsers = new Map();
 
-const buildUserPayload = (user) => ({
-    _id: user._id || user.id || 'demo-user',
-    name: user.name || 'Demo User',
-    email: user.email,
-    token: generateToken(user._id || user.id || 'demo-user')
-});
+const buildUserPayload = (user) => {
+    const userId = user._id || user.id || 'demo-user';
+    return {
+        _id: userId,
+        name: user.name || 'Demo User',
+        email: user.email,
+        token: generateToken({
+            id: userId,
+            name: user.name || 'Demo User',
+            email: user.email,
+            role: user.role || 'user'
+        })
+    };
+};
 
 const canUseDatabase = () => mongoose.connection.readyState === 1;
 

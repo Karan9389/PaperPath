@@ -8,8 +8,14 @@ import userRouters from './src/routes/userRoutes.js';
 import aiRoute from './src/routes/aiRoutes.js'
 import paperRouter from './src/routes/paperRoutes.js'; // 1. Import your new router layer
 // import paperRoutes from './src/routes/'
-const envPath = path.resolve(process.cwd(), '../.env');
-dotenv.config({ path: envPath });
+const envPath = path.resolve(process.cwd(), '.env');
+const fallbackEnvPath = path.resolve(process.cwd(), '../.env');
+const envResult = dotenv.config({ path: envPath });
+
+if (envResult.error) {
+    dotenv.config({ path: fallbackEnvPath });
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
