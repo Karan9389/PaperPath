@@ -320,4 +320,6 @@ Possible enhancements for the project include:
 
 This project was built as a full-stack academic paper learning application with a focus on accessibility, search, and AI-assisted learning.
 
-If you are uploading this project to GitHub or another platform, this README is ready to use as the main project documentation.
+Author and Creator :
+Karan Kumar 
+Aditya Kushwaha 
