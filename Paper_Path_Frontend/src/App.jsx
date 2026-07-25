@@ -123,25 +123,28 @@ export default function App() {
     setView('reader');
   };
 
-  const toggleSave = async (paperId, e) => {
-    e.stopPropagation();
+  const toggleSave = async (paper) => {
+    if (!paper || !paper._id) return;
+    const paperId = paper._id;
 
-    if (savedPapers.find((paper) => paper._id === paperId)) {
+    if (savedPapers.find((sp) => sp._id === paperId)) {
       try {
         await libraryService.unsavePaper(paperId);
-        setSavedPapers(savedPapers.filter((paper) => paper._id !== paperId));
+        setSavedPapers((prev) => prev.filter((sp) => sp._id !== paperId));
       } catch (error) {
         console.error('Could not unsave paper', error);
       }
       return;
     }
 
-    const paperToSave = papers.find((paper) => paper._id === paperId);
-    if (!paperToSave) return;
+    // Paper may be in papers feed, savedPapers, or readHistory — find from all
+    const paperToSave = papers.find((p) => p._id === paperId)
+      || readHistory.find((p) => p._id === paperId)
+      || paper;
 
     try {
       await libraryService.savePaper(paperId);
-      setSavedPapers([...savedPapers, paperToSave]);
+      setSavedPapers((prev) => [...prev, paperToSave]);
     } catch (error) {
       console.error('Could not save paper', error);
     }
@@ -181,7 +184,7 @@ export default function App() {
                 <ReaderView
                   paper={currentPaper}
                   isSaved={!!currentPaper && !!savedPapers.find((sp) => sp._id === currentPaper._id)}
-                  onToggleSave={(e) => currentPaper && toggleSave(currentPaper._id, e)}
+                  onToggleSave={() => currentPaper && toggleSave(currentPaper)}
                   onBack={() => setView('dashboard')}
                 />
               );

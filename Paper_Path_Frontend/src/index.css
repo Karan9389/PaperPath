@@ -2,80 +2,183 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== PREMIUM DESIGN TOKENS ===== */
+:root {
+  --bg-base:       #070b11;
+  --bg-surface:    #0d1117;
+  --bg-raised:     #161b22;
+  --bg-overlay:    #1c2128;
+
+  --border-subtle: rgba(48, 54, 61, 0.6);
+  --border-muted:  rgba(48, 54, 61, 1);
+  --border-active: rgba(99, 179, 237, 0.5);
+
+  --text-primary:  #e6edf3;
+  --text-secondary:#8b949e;
+  --text-muted:    #545d68;
+
+  /* Brand Palette */
+  --accent-blue:   #58a6ff;
+  --accent-blue-bright: #79c0ff;
+  --accent-green:  #3fb950;
+  --accent-purple: #a371f7;
+  --accent-orange: #e3b341;
+  --accent-red:    #f85149;
+
+  /* Glows */
+  --glow-blue:   0 0 20px -4px rgba(88, 166, 255, 0.35);
+  --glow-green:  0 0 20px -4px rgba(63, 185, 80, 0.35);
+  --glow-purple: 0 0 20px -4px rgba(163, 113, 247, 0.35);
+}
+
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #090d13;
-    color: #e6edf3;
-    background-image: 
-      radial-gradient(at 10% 10%, rgba(35, 134, 54, 0.08) 0px, transparent 50%),
-      radial-gradient(at 90% 90%, rgba(88, 166, 255, 0.06) 0px, transparent 50%);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    /* Subtle ambient glow in corners */
+    background-image:
+      radial-gradient(ellipse at 5% 0%,   rgba(88, 166, 255, 0.05) 0px, transparent 55%),
+      radial-gradient(ellipse at 95% 0%,  rgba(63, 185, 80, 0.04) 0px, transparent 45%),
+      radial-gradient(ellipse at 50% 100%, rgba(163, 113, 247, 0.04) 0px, transparent 50%);
     background-attachment: fixed;
+  }
+
+  /* Selection color */
+  ::selection {
+    background: rgba(88, 166, 255, 0.25);
+    color: var(--accent-blue-bright);
   }
 }
 
-/* Glassmorphism & UI Accents */
+/* ===== GLASS COMPONENTS ===== */
 .glass-panel {
-  background: rgba(22, 27, 34, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(240, 246, 252, 0.1);
+  background: rgba(22, 27, 34, 0.7);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid var(--border-subtle);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(22, 27, 34, 0.85) 0%, rgba(13, 17, 23, 0.95) 100%);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(48, 54, 61, 0.8);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: linear-gradient(
+    150deg,
+    rgba(22, 27, 34, 0.9) 0%,
+    rgba(13, 17, 23, 0.97) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-muted);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(88, 166, 255, 0.4);
+  border-color: rgba(88, 166, 255, 0.35);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4), 0 0 12px 0 rgba(88, 166, 255, 0.1);
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(88, 166, 255, 0.08),
+    0 0 16px -6px rgba(88, 166, 255, 0.15);
 }
 
-.glow-emerald {
-  box-shadow: 0 0 15px -3px rgba(63, 185, 80, 0.3);
-}
+/* ===== GLOWS ===== */
+.glow-blue   { box-shadow: var(--glow-blue); }
+.glow-emerald{ box-shadow: var(--glow-green); }
+.glow-indigo { box-shadow: var(--glow-purple); }
+.glow-orange { box-shadow: 0 0 20px -4px rgba(227, 179, 65, 0.35); }
 
-.glow-indigo {
-  box-shadow: 0 0 15px -3px rgba(163, 113, 247, 0.3);
-}
-
-/* Badge Enhancements */
+/* ===== DIFFICULTY BADGES ===== */
 .badge-beginner {
-  background: rgba(35, 134, 54, 0.15);
-  color: #3fb950;
-  border: 1px solid rgba(63, 185, 80, 0.35);
+  background: rgba(63, 185, 80, 0.12);
+  color: #4ade80;
+  border: 1px solid rgba(63, 185, 80, 0.3);
+  letter-spacing: 0.08em;
 }
 
 .badge-intermediate {
-  background: rgba(163, 113, 247, 0.15);
-  color: #d2a8ff;
-  border: 1px solid rgba(163, 113, 247, 0.35);
+  background: rgba(88, 166, 255, 0.12);
+  color: #79c0ff;
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  letter-spacing: 0.08em;
 }
 
 .badge-advanced {
-  background: rgba(248, 81, 73, 0.15);
-  color: #ff7b72;
-  border: 1px solid rgba(248, 81, 73, 0.35);
+  background: rgba(248, 81, 73, 0.12);
+  color: #fc8888;
+  border: 1px solid rgba(248, 81, 73, 0.3);
+  letter-spacing: 0.08em;
 }
 
-/* Custom Sleek Dark Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ===== ANIMATED GRADIENT BORDER ===== */
+.gradient-border-top {
+  position: relative;
 }
-::-webkit-scrollbar-track {
-  background: #090d13;
+.gradient-border-top::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #58a6ff, #3fb950, #a371f7, transparent);
+  opacity: 0.6;
 }
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
+  background: rgba(48, 54, 61, 0.8);
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #58a6ff;
+::-webkit-scrollbar-thumb:hover { background: rgba(88, 166, 255, 0.6); }
+
+/* ===== FOCUS RING ===== */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(88, 166, 255, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ===== UTILITY ===== */
+.text-gradient-blue-green {
+  background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple-blue {
+  background: linear-gradient(135deg, #a371f7 0%, #58a6ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Pulse dot utility */
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3fb950;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* Shimmer loader */
+.shimmer {
+  background: linear-gradient(90deg, rgba(22,27,34,0.9) 25%, rgba(30,38,48,0.8) 50%, rgba(22,27,34,0.9) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

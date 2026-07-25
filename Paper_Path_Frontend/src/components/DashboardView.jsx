@@ -1,240 +1,331 @@
 import React, { useState } from 'react';
-import { Bookmark, Bot, Cpu, Filter, History, Library, Loader2, MessageSquare, Plus, Search, Sparkles, Terminal, Zap, GitPullRequest, Folder, ShieldCheck, ArrowRight } from 'lucide-react';
+import {
+  Bookmark, Cpu, History, Library, Loader2, MessageSquare,
+  Search, Sparkles, GitPullRequest, Folder, Database,
+  FlaskConical, Layers, Zap, ChevronRight
+} from 'lucide-react';
 import PaperCard from './PaperCard';
+
+const CATEGORY_ICONS = {
+  'Natural Language Processing': '💬',
+  'Computer Vision': '👁️',
+  'Generative AI': '🎨',
+  'Multimodal AI': '🔀',
+  'Reinforcement Learning': '🎮',
+  'Deep Learning': '🧠',
+  'Large Language Models': '📖',
+  'Artificial Intelligence': '🤖',
+  'AI Alignment': '⚖️',
+  'Computational Biology': '🧬',
+  'Graph Machine Learning': '🕸️',
+};
 
 export default function DashboardView({ papers, savedPapers, readHistory, isLoading, onOpenPaper, onToggleSave }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
-  const [feedTab, setFeedTab] = useState('all'); // 'all' | 'saved' | 'history'
+  const [feedTab, setFeedTab] = useState('all');
 
   const activeBaseList = feedTab === 'saved' ? savedPapers : feedTab === 'history' ? readHistory : papers;
 
   const displayedPapers = activeBaseList.filter((paper) => {
     const query = searchQuery.toLowerCase().trim();
-    const matchesSearch = !query || 
+    const matchesSearch = !query ||
       paper.title?.toLowerCase().includes(query) ||
       paper.abstract?.toLowerCase().includes(query) ||
       paper.authors?.toLowerCase().includes(query) ||
-      paper.category?.toLowerCase().includes(query);
+      paper.category?.toLowerCase().includes(query) ||
+      paper.tags?.some(t => t.toLowerCase().includes(query));
 
     const paperDiff = (paper.difficultyLevel || paper.difficulty || 'beginner').toLowerCase();
-    const matchesDifficulty = difficultyFilter === 'all' || paperDiff === difficultyFilter.toLowerCase();
-
+    const matchesDifficulty = difficultyFilter === 'all' || paperDiff === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
+
+  // Derive unique categories for stat panel
+  const categories = [...new Set(papers.map(p => p.category).filter(Boolean))];
 
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center h-96 space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-[#3fb950]" />
-        <p className="text-xs font-mono text-[#848d96] animate-pulse">Initializing PaperPath Gemini Vector Index...</p>
+        <div className="relative">
+          <Loader2 className="h-7 w-7 animate-spin text-[#3fb950]" />
+          <div className="absolute inset-0 rounded-full blur-md opacity-40 bg-[#3fb950] animate-pulse" />
+        </div>
+        <p className="text-xs font-mono text-[#8b949e] animate-pulse">Fetching research index...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
-      {/* 🐙 3-COLUMN DASHBOARD GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* --- LEFT SIDEBAR: TOP SAVED PAPERS & RECENT READING (3 cols) --- */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Top Saved Papers */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      {/* 3-COLUMN LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        {/* ── LEFT SIDEBAR ── */}
+        <div className="lg:col-span-3 space-y-4">
+
+          {/* Saved Papers panel */}
           <div className="glass-card rounded-xl p-4 space-y-3">
-            <div className="flex justify-between items-center pb-2.5 border-b border-[#30363d]">
-              <span className="text-xs font-bold text-[#f0f6fc] flex items-center">
-                <Bookmark className="h-3.5 w-3.5 mr-1.5 text-[#3fb950]" /> Saved Papers
+            <div className="flex justify-between items-center pb-2 border-b border-[#21262d]">
+              <span className="text-xs font-bold text-[#e6edf3] flex items-center gap-1.5">
+                <Bookmark className="h-3.5 w-3.5 text-[#a371f7]" />
+                Bookmarked
               </span>
-              <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2 py-0.5 rounded-full border border-[#238636]/40">
+              <span className="text-[10px] font-mono font-bold text-[#c4a0ff] bg-[#a371f7]/10 px-2 py-0.5 rounded-full border border-[#8957e5]/30">
                 {savedPapers.length}
               </span>
             </div>
 
             {savedPapers.length > 0 ? (
-              <div className="space-y-1.5">
-                {savedPapers.slice(0, 5).map((p) => (
+              <div className="space-y-0.5">
+                {savedPapers.slice(0, 6).map((p) => (
                   <div
                     key={p._id}
                     onClick={() => onOpenPaper(p)}
-                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-2 rounded-lg hover:bg-[#21262d]/80 transition-colors group"
+                    className="flex items-center gap-2 text-[11px] text-[#8b949e] hover:text-[#e6edf3] cursor-pointer px-2 py-1.5 rounded-lg hover:bg-[#1c2128] transition-all group"
                   >
-                    <Folder className="h-3.5 w-3.5 text-[#848d96] group-hover:text-[#58a6ff] shrink-0" />
-                    <span className="truncate font-medium">{p.title}</span>
+                    <Folder className="h-3 w-3 text-[#545d68] group-hover:text-[#a371f7] shrink-0 transition-colors" />
+                    <span className="truncate">{p.title}</span>
+                    <ChevronRight className="h-3 w-3 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-[#545d68]" />
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#848d96] italic py-2">No saved papers yet. Click bookmark to save.</p>
+              <p className="text-[11px] text-[#545d68] italic py-1">Click 🔖 on any card to bookmark it.</p>
             )}
           </div>
 
-          {/* Reading History */}
+          {/* Recent History panel */}
           <div className="glass-card rounded-xl p-4 space-y-3">
-            <div className="flex justify-between items-center pb-2.5 border-b border-[#30363d]">
-              <span className="text-xs font-bold text-[#f0f6fc] flex items-center">
-                <History className="h-3.5 w-3.5 mr-1.5 text-[#a371f7]" /> Recent Reading
+            <div className="flex justify-between items-center pb-2 border-b border-[#21262d]">
+              <span className="text-xs font-bold text-[#e6edf3] flex items-center gap-1.5">
+                <History className="h-3.5 w-3.5 text-[#58a6ff]" />
+                Recent
               </span>
-              <span className="text-[10px] font-mono text-[#d2a8ff] bg-[#a371f7]/20 px-2 py-0.5 rounded-full border border-[#8957e5]/40">
+              <span className="text-[10px] font-mono font-bold text-[#79c0ff] bg-[#58a6ff]/10 px-2 py-0.5 rounded-full border border-[#58a6ff]/25">
                 {readHistory.length}
               </span>
             </div>
 
             {readHistory.length > 0 ? (
-              <div className="space-y-1.5">
+              <div className="space-y-0.5">
                 {readHistory.slice(0, 5).map((p) => (
                   <div
                     key={p._id}
                     onClick={() => onOpenPaper(p)}
-                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-2 rounded-lg hover:bg-[#21262d]/80 transition-colors group"
+                    className="flex items-center gap-2 text-[11px] text-[#8b949e] hover:text-[#e6edf3] cursor-pointer px-2 py-1.5 rounded-lg hover:bg-[#1c2128] transition-all group"
                   >
-                    <GitPullRequest className="h-3.5 w-3.5 text-[#3fb950] shrink-0" />
-                    <span className="truncate font-medium">{p.title}</span>
+                    <GitPullRequest className="h-3 w-3 text-[#545d68] group-hover:text-[#58a6ff] shrink-0 transition-colors" />
+                    <span className="truncate">{p.title}</span>
+                    <ChevronRight className="h-3 w-3 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-[#545d68]" />
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#848d96] italic py-2">No recent papers opened.</p>
+              <p className="text-[11px] text-[#545d68] italic py-1">Open any paper to track progress.</p>
             )}
+          </div>
+
+          {/* Categories panel */}
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-1.5 pb-2 border-b border-[#21262d]">
+              <Layers className="h-3.5 w-3.5 text-[#e3b341]" />
+              <span className="text-xs font-bold text-[#e6edf3]">Categories</span>
+            </div>
+            <div className="space-y-1">
+              {categories.slice(0, 7).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSearchQuery(cat)}
+                  className="w-full flex items-center gap-2 text-[11px] text-[#8b949e] hover:text-[#e6edf3] px-2 py-1 rounded-lg hover:bg-[#1c2128] transition-all text-left group"
+                >
+                  <span>{CATEGORY_ICONS[cat] || '📄'}</span>
+                  <span className="truncate">{cat}</span>
+                  <span className="ml-auto text-[10px] text-[#545d68] group-hover:text-[#8b949e]">
+                    {papers.filter(p => p.category === cat).length}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* --- CENTER FEED: COPILOT PROMPT & PAPER FEED (6 cols) --- */}
-        <div className="lg:col-span-6 space-y-6">
-          
-          {/* 🤖 HERO COPILOT PROMPT CARD */}
-          <div className="glass-card rounded-xl p-5 space-y-4 shadow-xl relative overflow-hidden">
+        {/* ── CENTRE FEED ── */}
+        <div className="lg:col-span-6 space-y-5">
+
+          {/* Hero search bar */}
+          <div className="glass-card rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#58a6ff]" />
-                <h2 className="text-base font-extrabold text-[#f0f6fc]">Academic Copilot Search</h2>
+                <h2 className="text-sm font-bold text-[#e6edf3]">Research Explorer</h2>
               </div>
-              <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2.5 py-0.5 rounded-full border border-[#238636]/40 flex items-center glow-emerald">
-                <span className="w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1.5 animate-pulse"></span> Active
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1"
+                style={{ background: 'rgba(63,185,80,0.1)', border: '1px solid rgba(63,185,80,0.25)', color: '#3fb950' }}
+              >
+                <span className="pulse-dot" style={{ width: 5, height: 5 }} /> Gemini Active
               </span>
             </div>
 
-            {/* Input Box */}
-            <div className="bg-[#0d1117]/90 border border-[#30363d] focus-within:border-[#58a6ff] rounded-lg p-3.5 space-y-3 transition-colors shadow-inner">
-              <div className="flex items-center space-x-2">
-                <Search className="h-4 w-4 text-[#58a6ff] shrink-0" />
+            <div className="bg-[#0d1117] border border-[#21262d] focus-within:border-[#58a6ff]/50 rounded-lg p-3 space-y-2.5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Search className="h-3.5 w-3.5 text-[#58a6ff] shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Ask anything or filter research papers by title, topic, author..."
-                  className="w-full bg-transparent text-xs text-[#f0f6fc] placeholder-[#848d96] outline-none font-sans"
+                  placeholder="Search by title, author, topic, or tag..."
+                  className="w-full bg-transparent text-xs text-[#e6edf3] placeholder-[#545d68] outline-none"
                 />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="text-[#545d68] hover:text-[#e6edf3] text-xs shrink-0 transition-colors">✕</button>
+                )}
               </div>
 
-              {/* Action Buttons Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#30363d]/60">
-                <button className="flex items-center px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-md text-[11px] font-medium text-[#c9d1d9] hover:bg-[#30363d] hover:text-[#f0f6fc] transition-all">
-                  <MessageSquare className="h-3 w-3 mr-1.5 text-[#58a6ff]" /> Ask Gemini AI
-                </button>
+              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#21262d]">
                 <select
                   value={difficultyFilter}
                   onChange={(e) => setDifficultyFilter(e.target.value)}
-                  className="bg-[#21262d] border border-[#30363d] rounded-md text-[11px] font-medium text-[#c9d1d9] px-2.5 py-1 outline-none cursor-pointer hover:border-[#58a6ff] transition-all"
+                  className="bg-[#1c2128] border border-[#30363d] rounded-md text-[11px] font-medium text-[#8b949e] px-2.5 py-1 outline-none cursor-pointer hover:border-[#58a6ff]/40 transition-all"
                 >
-                  <option value="all">All Difficulty Levels</option>
-                  <option value="beginner">Beginner Level</option>
-                  <option value="intermediate">Intermediate Level</option>
-                  <option value="advanced">Advanced Level</option>
+                  <option value="all">All Levels</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
                 </select>
-                <span className="text-[11px] text-[#848d96] ml-auto font-mono">{displayedPapers.length} research papers</span>
+
+                <span className="text-[11px] text-[#545d68] ml-auto font-mono">
+                  {displayedPapers.length} result{displayedPapers.length !== 1 ? 's' : ''}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* PAPER CARDS FEED WITH TAB FILTER */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[#30363d] pb-3">
-              <div className="flex items-center space-x-1.5 bg-[#161b22]/90 p-1 rounded-lg border border-[#30363d]">
+          {/* Feed Tabs + Cards */}
+          <div className="space-y-3">
+            {/* Tab switcher */}
+            <div className="flex items-center gap-1 p-0.5 rounded-lg w-fit"
+              style={{ background: 'rgba(13,17,23,0.9)', border: '1px solid rgba(48,54,61,0.6)' }}
+            >
+              {[
+                { key: 'all',     label: `Feed`, count: papers.length },
+                { key: 'saved',   label: `Saved`, count: savedPapers.length },
+                { key: 'history', label: `History`, count: readHistory.length },
+              ].map(tab => (
                 <button
-                  onClick={() => setFeedTab('all')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    feedTab === 'all' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                  key={tab.key}
+                  onClick={() => setFeedTab(tab.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all duration-150 ${
+                    feedTab === tab.key
+                      ? 'bg-[#1c2128] text-[#e6edf3] border border-[#30363d]/70 shadow-sm'
+                      : 'text-[#8b949e] hover:text-[#c9d1d9]'
                   }`}
                 >
-                  Feed ({papers.length})
+                  {tab.label}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono ${
+                    feedTab === tab.key
+                      ? 'bg-[#58a6ff]/15 text-[#79c0ff] border border-[#58a6ff]/20'
+                      : 'text-[#545d68]'
+                  }`}>
+                    {tab.count}
+                  </span>
                 </button>
-                <button
-                  onClick={() => setFeedTab('saved')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    feedTab === 'saved' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
-                  }`}
-                >
-                  Bookmarks ({savedPapers.length})
-                </button>
-                <button
-                  onClick={() => setFeedTab('history')}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-                    feedTab === 'history' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
-                  }`}
-                >
-                  History ({readHistory.length})
-                </button>
-              </div>
+              ))}
             </div>
 
-            {/* Paper Cards List */}
+            {/* Paper cards */}
             {displayedPapers.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {displayedPapers.map((paper) => (
                   <PaperCard
                     key={paper._id}
                     paper={paper}
                     isSaved={savedPapers.some((s) => s._id === paper._id)}
                     onOpen={() => onOpenPaper(paper)}
-                    onToggleSave={() => onToggleSave(paper)}
+                    onToggleSave={onToggleSave}
                   />
                 ))}
               </div>
             ) : (
-              <div className="glass-card rounded-xl p-8 text-center space-y-3">
-                <Library className="h-8 w-8 text-[#848d96] mx-auto opacity-50" />
-                <p className="text-xs text-[#848d96]">No papers found matching your search filter.</p>
+              <div className="glass-card rounded-xl p-10 text-center space-y-3">
+                <Library className="h-8 w-8 text-[#30363d] mx-auto" />
+                <p className="text-xs text-[#545d68]">
+                  {feedTab === 'saved' ? 'No bookmarked papers yet.' : feedTab === 'history' ? 'No reading history yet.' : 'No papers match your search.'}
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* --- RIGHT SIDEBAR: AI TUTOR STATUS & CHANGELOG (3 cols) --- */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="glass-card rounded-xl p-5 space-y-4">
-            <div className="flex items-center space-x-2 pb-2 border-b border-[#30363d]">
-              <Cpu className="h-4 w-4 text-[#3fb950]" />
-              <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider">PAPERPATH AI ENGINE</h3>
+        {/* ── RIGHT SIDEBAR ── */}
+        <div className="lg:col-span-3 space-y-4">
+
+          {/* AI Engine stats */}
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-1.5 pb-2 border-b border-[#21262d]">
+              <Cpu className="h-3.5 w-3.5 text-[#3fb950]" />
+              <h3 className="text-xs font-bold text-[#e6edf3] uppercase tracking-wider">AI Engine</h3>
             </div>
-            
-            <div className="space-y-2 text-xs text-[#848d96]">
-              <div className="flex justify-between items-center py-1 border-b border-[#30363d]/40">
-                <span>LLM Model:</span>
-                <span className="font-mono text-[#3fb950] font-semibold">Gemini Flash</span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-[#30363d]/40">
-                <span>Embedding API:</span>
-                <span className="font-mono text-[#58a6ff] font-semibold">Gemini Embed-001</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span>Vector RAG:</span>
-                <span className="font-mono text-[#a371f7] font-semibold">Active</span>
-              </div>
+
+            <div className="space-y-2">
+              {[
+                { label: 'Text Model', value: 'Gemini Flash', color: '#3fb950' },
+                { label: 'Embeddings', value: 'Gemini Embed', color: '#58a6ff' },
+                { label: 'RAG Pipeline', value: 'Active', color: '#a371f7' },
+                { label: 'Papers Indexed', value: `${papers.length}`, color: '#e3b341' },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="flex justify-between items-center py-1 border-b border-[#21262d]/60 last:border-0">
+                  <span className="text-[11px] text-[#8b949e]">{label}</span>
+                  <span className="text-[11px] font-mono font-semibold" style={{ color }}>{value}</span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Changelog */}
-          <div className="glass-card rounded-xl p-5 space-y-3">
-            <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider pb-2 border-b border-[#30363d]">
-              System Status
-            </h3>
-            <p className="text-xs text-[#c9d1d9] leading-relaxed">
-              Google Gemini API is active for both paper vector embeddings and instant AI tutor responses.
-            </p>
+          {/* Quick tips */}
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-1.5 pb-2 border-b border-[#21262d]">
+              <Zap className="h-3.5 w-3.5 text-[#e3b341]" />
+              <h3 className="text-xs font-bold text-[#e6edf3]">Quick Tips</h3>
+            </div>
+            <ul className="space-y-2">
+              {[
+                'Click any card to open the AI Reader',
+                'Ask Gemini questions about the paper',
+                'Bookmark papers to save to library',
+                'Filter by difficulty or search by author',
+              ].map((tip, i) => (
+                <li key={i} className="flex items-start gap-2 text-[11px] text-[#8b949e] leading-snug">
+                  <span className="text-[#e3b341] font-bold shrink-0 mt-0.5">›</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Level legend */}
+          <div className="glass-card rounded-xl p-4 space-y-2.5">
+            <div className="flex items-center gap-1.5 pb-2 border-b border-[#21262d]">
+              <FlaskConical className="h-3.5 w-3.5 text-[#58a6ff]" />
+              <h3 className="text-xs font-bold text-[#e6edf3]">Difficulty</h3>
+            </div>
+            {[
+              { level: 'Beginner', color: '#4ade80', bg: 'rgba(63,185,80,0.1)', border: 'rgba(63,185,80,0.25)', desc: 'Core concepts' },
+              { level: 'Intermediate', color: '#79c0ff', bg: 'rgba(88,166,255,0.1)', border: 'rgba(88,166,255,0.25)', desc: 'Applied research' },
+              { level: 'Advanced', color: '#fc8888', bg: 'rgba(248,81,73,0.1)', border: 'rgba(248,81,73,0.25)', desc: 'SOTA methods' },
+            ].map(({ level, color, bg, border, desc }) => (
+              <div key={level} className="flex items-center gap-2">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded shrink-0"
+                  style={{ color, background: bg, border: `1px solid ${border}` }}
+                >
+                  {level}
+                </span>
+                <span className="text-[10px] text-[#545d68]">{desc}</span>
+              </div>
+            ))}
           </div>
         </div>
-
       </div>
     </div>
   );
