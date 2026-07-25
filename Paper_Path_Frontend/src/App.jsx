@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
-// Removed MOCK_PAPERS from the import!
+import ProfileView from './components/ProfileView';
 import { authService, libraryService, paperService } from './services/api';
 
 export default function App() {
@@ -16,6 +16,22 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authError, setAuthError] = useState('');
+
+  // 🔄 Check stored session token on mount
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const storedProfile = await authService.getProfile();
+        if (storedProfile && storedProfile._id) {
+          setUser(storedProfile);
+          setView('dashboard');
+        }
+      } catch (err) {
+        // Token invalid or expired
+      }
+    };
+    restoreSession();
+  }, []);
 
   const handleLogin = async (e, email, password) => {
     e.preventDefault();
@@ -50,6 +66,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    authService.logout();
     setUser(null);
     setCurrentPaper(null);
     setAuthError('');
@@ -66,7 +83,6 @@ export default function App() {
         libraryService.getLibrary(),
       ]);
 
-      // Changed fallback from MOCK_PAPERS to an empty array []
       const papersResult = fetchedPapers.status === 'fulfilled' ? fetchedPapers.value : [];
       const libraryResult = libraryData.status === 'fulfilled'
         ? libraryData.value
@@ -77,7 +93,6 @@ export default function App() {
       setReadHistory(libraryResult.readHistory || []);
     } catch (error) {
       console.error('Could not load dashboard data', error);
-      // Changed fallback from MOCK_PAPERS to an empty array []
       setPapers([]);
       setSavedPapers([]);
       setReadHistory([]);
@@ -87,7 +102,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (view === 'dashboard' && papers.length === 0) {
+    if ((view === 'dashboard' || view === 'profile') && papers.length === 0) {
       fetchDashboardData();
     }
   }, [view]);
@@ -134,7 +149,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
-      {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} />}
+      {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} currentView={view} />}
 
       <main className="max-w-7xl mx-auto">
         {(() => {
@@ -162,7 +177,24 @@ export default function App() {
                 />
               );
             case 'reader':
-              return <ReaderView paper={currentPaper} onBack={() => setView('dashboard')} />;
+              return (
+                <ReaderView
+                  paper={currentPaper}
+                  isSaved={!!currentPaper && !!savedPapers.find((sp) => sp._id === currentPaper._id)}
+                  onToggleSave={(e) => currentPaper && toggleSave(currentPaper._id, e)}
+                  onBack={() => setView('dashboard')}
+                />
+              );
+            case 'profile':
+              return (
+                <ProfileView
+                  user={user}
+                  savedPapers={savedPapers}
+                  readHistory={readHistory}
+                  onLogout={handleLogout}
+                  setView={setView}
+                />
+              );
             default:
               return (
                 <LoginView

@@ -54,6 +54,12 @@ export const authService = {
     persistToken(result);
     return result;
   },
+  getProfile: async () => {
+    return request('/auth/profile');
+  },
+  logout: () => {
+    persistToken(null);
+  },
 };
 
 export const paperService = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit, Lock } from 'lucide-react';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
 
@@ -7,43 +7,51 @@ export default function LoginView({ onLogin, onRegister, isLoading, authMode, se
   const isLogin = authMode === 'login';
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 via-white to-slate-100">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-slate-100">
-        <div>
-          <div className="mx-auto h-16 w-16 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-            <BrainCircuit className="h-8 w-8 text-white" />
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[#0d1117]">
+      <div className="max-w-md w-full space-y-6">
+        {/* GitHub Style Header */}
+        <div className="text-center space-y-2">
+          <div className="mx-auto h-12 w-12 bg-[#21262d] border border-[#30363d] rounded-full flex items-center justify-center">
+            <BrainCircuit className="h-6 w-6 text-[#3fb950]" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
-            Welcome to PaperPath
+          <h2 className="text-xl font-bold text-[#f0f6fc] tracking-tight">
+            Sign in to PaperPath <span className="text-[#3fb950]">AI</span>
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-500">
-            Research papers made easy for beginners.
-          </p>
         </div>
 
-        <div className="flex rounded-xl bg-slate-100 p-1">
-          <button
-            type="button"
-            onClick={() => setAuthMode('login')}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${isLogin ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600'}`}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setAuthMode('register')}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${!isLogin ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600'}`}
-          >
-            Register
-          </button>
-        </div>
+        {/* GitHub Dark Card Container */}
+        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-6 space-y-6 shadow-xl">
+          {/* Mode Switcher */}
+          <div className="flex border-b border-[#30363d] pb-3 space-x-4">
+            <button
+              type="button"
+              onClick={() => setAuthMode('login')}
+              className={`text-xs font-semibold pb-2 border-b-2 transition-colors ${
+                isLogin ? 'border-[#f78166] text-[#f0f6fc]' : 'border-transparent text-[#848d96] hover:text-[#c9d1d9]'
+              }`}
+            >
+              Sign in
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMode('register')}
+              className={`text-xs font-semibold pb-2 border-b-2 transition-colors ${
+                !isLogin ? 'border-[#f78166] text-[#f0f6fc]' : 'border-transparent text-[#848d96] hover:text-[#c9d1d9]'
+              }`}
+            >
+              Create account
+            </button>
+          </div>
 
-        {isLogin ? (
-          <LoginForm onSubmit={onLogin} isLoading={isLoading} authError={authError} />
-        ) : (
-          <RegisterForm onSubmit={onRegister} isLoading={isLoading} authError={authError} />
-        )}
+          {isLogin ? (
+            <LoginForm onSubmit={onLogin} isLoading={isLoading} authError={authError} />
+          ) : (
+            <RegisterForm onSubmit={onRegister} isLoading={isLoading} authError={authError} />
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
+

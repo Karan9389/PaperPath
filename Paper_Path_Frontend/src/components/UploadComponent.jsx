@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-// Assuming lucide-react is installed since it's in your stack
-import { UploadCloud, Loader2 } from 'lucide-react'; 
+import { UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle } from 'lucide-react'; 
 
 const UploadComponent = ({ onUploadSuccess }) => {
     const [file, setFile] = useState(null);
@@ -22,27 +21,22 @@ const UploadComponent = ({ onUploadSuccess }) => {
         setMessage('');
 
         const formData = new FormData();
-        // IMPORTANT: The backend multer is looking for exactly 'dataset'
         formData.append('dataset', file);
 
         try {
-            // Pointing to your new Node backend port
             const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
             
             const response = await fetch(`${baseUrl}/papers/upload`, {
                 method: 'POST',
                 body: formData,
-                // Note: Do NOT set 'Content-Type' header here. 
-                // The browser sets it automatically with the correct boundary for FormData.
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 setMessage(`✅ ${data.message}`);
-                setFile(null); // Clear the file input
+                setFile(null);
                 
-                // If the dashboard passed a refresh function, call it so the new paper appears!
                 if (onUploadSuccess) {
                     setTimeout(() => onUploadSuccess(), 1500); 
                 }
@@ -57,40 +51,56 @@ const UploadComponent = ({ onUploadSuccess }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <UploadCloud className="w-5 h-5 text-blue-500" />
-                Upload New Paper or Dataset
-            </h3>
+        <div className="bg-[#0d1117] p-5 rounded-md border border-[#30363d] space-y-4">
+            <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider flex items-center gap-2">
+                    <UploadCloud className="w-4 h-4 text-[#3fb950]" />
+                    Dataset Ingestion Pipeline
+                </h3>
+                <div className="flex items-center space-x-2">
+                    <span className="text-[10px] font-mono font-bold text-[#58a6ff] bg-[#58a6ff]/10 border border-[#58a6ff]/30 px-2 py-0.5 rounded">.PDF</span>
+                    <span className="text-[10px] font-mono font-bold text-[#3fb950] bg-[#238636]/10 border border-[#238636]/30 px-2 py-0.5 rounded">.CSV</span>
+                </div>
+            </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                 <input 
                     type="file" 
                     accept=".pdf,.csv"
                     onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
+                    className="block w-full text-xs text-[#848d96]
+                        file:mr-4 file:py-2 file:px-3
                         file:rounded-md file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100 cursor-pointer"
+                        file:text-xs file:font-semibold
+                        file:bg-[#21262d] file:text-[#c9d1d9]
+                        hover:file:bg-[#30363d] cursor-pointer
+                        bg-[#161b22] border border-[#30363d] rounded-md p-1"
                 />
                 <button 
                     onClick={handleUpload} 
                     disabled={!file || isUploading}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-md font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors whitespace-nowrap"
+                    className="bg-[#238636] hover:bg-[#2ea043] text-white px-4 py-2 rounded-md font-bold text-xs uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shrink-0"
                 >
                     {isUploading ? (
-                        <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Ingesting...</>
                     ) : (
-                        'Upload to Database'
+                        'Ingest Dataset'
                     )}
                 </button>
             </div>
 
             {message && (
-                <div className={`mt-4 text-sm font-medium ${message.startsWith('✅') ? 'text-green-600' : 'text-red-600'}`}>
-                    {message}
+                <div className={`p-3 rounded-md border text-xs font-medium flex items-center space-x-2 ${
+                    message.startsWith('✅')
+                        ? 'bg-[#238636]/10 border-[#238636]/40 text-[#3fb950]'
+                        : 'bg-[#da3633]/10 border-[#da3633]/40 text-[#f85149]'
+                }`}>
+                    {message.startsWith('✅') ? (
+                        <CheckCircle2 className="h-4 w-4 text-[#3fb950] shrink-0" />
+                    ) : (
+                        <AlertCircle className="h-4 w-4 text-[#f85149] shrink-0" />
+                    )}
+                    <span>{message.replace(/^[✅❌]\s*/, '')}</span>
                 </div>
             )}
         </div>

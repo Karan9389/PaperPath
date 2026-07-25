@@ -1,8 +1,14 @@
+import mongoose from 'mongoose';
 import User from '../models/user.js';
 
 const toggleSavePaper = async (req, res) => {
     try {
+        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+            return res.json({ savedPapers: [] });
+        }
         const user = await User.findById(req.user._id);
+        if (!user) return res.json({ savedPapers: [] });
+        
         const paperId = req.params.paperId;
 
         const isSaved = user.savedPapers.includes(paperId);
@@ -22,7 +28,12 @@ const toggleSavePaper = async (req, res) => {
 
 const addPaperToHistory = async (req, res) => {
     try {
+        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+            return res.json({ readHistory: [] });
+        }
         const user = await User.findById(req.user._id);
+        if (!user) return res.json({ readHistory: [] });
+
         const paperId = req.params.paperId;
 
         user.readHistory = user.readHistory.filter((item) => item.paper?.toString() !== paperId);
@@ -36,12 +47,15 @@ const addPaperToHistory = async (req, res) => {
 
 const getUserLibrary = async (req, res) => {
     try {
+        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+            return res.json({ savedPapers: [], readHistory: [] });
+        }
         const user = await User.findById(req.user._id)
             .populate('savedPapers', 'title difficultyLevel abstract tags')
             .populate('readHistory.paper', 'title difficultyLevel abstract tags');
 
         if (!user) {
-            return res.status(404).json({ message: 'user not found' });
+            return res.json({ savedPapers: [], readHistory: [] });
         }
 
         const savedPapers = user.savedPapers || [];
