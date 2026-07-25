@@ -51,18 +51,35 @@ const getUserLibrary = async (req, res) => {
             return res.json({ savedPapers: [], readHistory: [] });
         }
         const user = await User.findById(req.user._id)
-            .populate('savedPapers', 'title difficultyLevel abstract tags')
-            .populate('readHistory.paper', 'title difficultyLevel abstract tags');
+            .populate({ path: 'savedPapers', select: 'title difficultyLevel abstract tags' })
+            .populate({ path: 'readHistory.paper', select: 'title difficultyLevel abstract tags' });
 
         if (!user) {
             return res.json({ savedPapers: [], readHistory: [] });
         }
 
-        const savedPapers = user.savedPapers || [];
-        const readHistory = (user.readHistory || []).map((entry) => entry.paper).filter(Boolean);
+        const savedPapers = (user.savedPapers || []).map((paper) => ({
+            _id: paper?._id,
+            title: paper?.title,
+            difficultyLevel: paper?.difficultyLevel || paper?.difficulty || 'Beginner',
+            abstract: paper?.abstract,
+            tags: paper?.tags || []
+        }));
+
+        const readHistory = (user.readHistory || [])
+            .map((entry) => entry?.paper)
+            .filter(Boolean)
+            .map((paper) => ({
+                _id: paper?._id,
+                title: paper?.title,
+                difficultyLevel: paper?.difficultyLevel || paper?.difficulty || 'Beginner',
+                abstract: paper?.abstract,
+                tags: paper?.tags || []
+            }));
 
         return res.json({ savedPapers, readHistory });
     } catch (error) {
+        console.error('❌ getUserLibrary failed:', error);
         return res.status(500).json({ message: error.message });
     }
 };

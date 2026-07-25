@@ -11,12 +11,15 @@ const paperSchema = new mongoose.Schema({
     title: { type: String, required: true, trim: true },
     authors: { type: String, default: "Unknown Author" },
     abstract: { type: String },
-    
+
     // Removed required: true
     pdfUrl: { type: String },
-    
+
     category: { type: String, default: "General", trim: true },
     difficulty: { type: String, enum: ['beginner', 'intermediate', 'advanced'], default: 'beginner' },
+    difficultyLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
+    tags: [{ type: String }],
+    content: { type: String },
     chunks: [chunkSchema],
     embedding: { type: [Number] }
 }, { timestamps: true });
