@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bookmark, Bot, Cpu, Filter, History, Library, Loader2, MessageSquare, Plus, Search, Sparkles, Terminal, Zap, GitPullRequest, Folder, ShieldCheck } from 'lucide-react';
+import { Bookmark, Bot, Cpu, Filter, History, Library, Loader2, MessageSquare, Plus, Search, Sparkles, Terminal, Zap, GitPullRequest, Folder, ShieldCheck, ArrowRight } from 'lucide-react';
 import PaperCard from './PaperCard';
 
 export default function DashboardView({ papers, savedPapers, readHistory, isLoading, onOpenPaper, onToggleSave }) {
@@ -25,38 +25,39 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
 
   if (isLoading) {
     return (
-      <div className="flex flex-col justify-center items-center h-96 space-y-4 bg-[#0d1117]">
+      <div className="flex flex-col justify-center items-center h-96 space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-[#3fb950]" />
-        <p className="text-xs font-mono text-[#848d96] animate-pulse">Initializing PaperPath AI Vector Index...</p>
+        <p className="text-xs font-mono text-[#848d96] animate-pulse">Initializing PaperPath Gemini Vector Index...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* 🐙 GITHUB 3-COLUMN DASHBOARD GRID */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      {/* 🐙 3-COLUMN DASHBOARD GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* --- LEFT SIDEBAR: TOP PAPERS & HISTORY (3 cols) --- */}
+        {/* --- LEFT SIDEBAR: TOP SAVED PAPERS & RECENT READING (3 cols) --- */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Top Saved Papers (GitHub Top Repositories style) */}
-          <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3">
-            <div className="flex justify-between items-center pb-2 border-b border-[#30363d]">
+          {/* Top Saved Papers */}
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <div className="flex justify-between items-center pb-2.5 border-b border-[#30363d]">
               <span className="text-xs font-bold text-[#f0f6fc] flex items-center">
-                <Bookmark className="h-3.5 w-3.5 mr-1.5 text-[#3fb950]" /> Top Saved Papers
+                <Bookmark className="h-3.5 w-3.5 mr-1.5 text-[#3fb950]" /> Saved Papers
               </span>
-              <span className="text-[10px] font-mono text-[#848d96] bg-[#21262d] px-1.5 py-0.5 rounded border border-[#30363d]">
+              <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2 py-0.5 rounded-full border border-[#238636]/40">
                 {savedPapers.length}
               </span>
             </div>
 
             {savedPapers.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {savedPapers.slice(0, 5).map((p) => (
                   <div
                     key={p._id}
                     onClick={() => onOpenPaper(p)}
-                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-1.5 rounded hover:bg-[#21262d] transition-colors group"
+                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-2 rounded-lg hover:bg-[#21262d]/80 transition-colors group"
                   >
                     <Folder className="h-3.5 w-3.5 text-[#848d96] group-hover:text-[#58a6ff] shrink-0" />
                     <span className="truncate font-medium">{p.title}</span>
@@ -64,28 +65,28 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#848d96] italic py-2">No saved papers yet.</p>
+              <p className="text-xs text-[#848d96] italic py-2">No saved papers yet. Click bookmark to save.</p>
             )}
           </div>
 
           {/* Reading History */}
-          <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3">
-            <div className="flex justify-between items-center pb-2 border-b border-[#30363d]">
+          <div className="glass-card rounded-xl p-4 space-y-3">
+            <div className="flex justify-between items-center pb-2.5 border-b border-[#30363d]">
               <span className="text-xs font-bold text-[#f0f6fc] flex items-center">
                 <History className="h-3.5 w-3.5 mr-1.5 text-[#a371f7]" /> Recent Reading
               </span>
-              <span className="text-[10px] font-mono text-[#848d96] bg-[#21262d] px-1.5 py-0.5 rounded border border-[#30363d]">
+              <span className="text-[10px] font-mono text-[#d2a8ff] bg-[#a371f7]/20 px-2 py-0.5 rounded-full border border-[#8957e5]/40">
                 {readHistory.length}
               </span>
             </div>
 
             {readHistory.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {readHistory.slice(0, 5).map((p) => (
                   <div
                     key={p._id}
                     onClick={() => onOpenPaper(p)}
-                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-1.5 rounded hover:bg-[#21262d] transition-colors group"
+                    className="flex items-center space-x-2 text-xs text-[#c9d1d9] hover:text-[#58a6ff] cursor-pointer p-2 rounded-lg hover:bg-[#21262d]/80 transition-colors group"
                   >
                     <GitPullRequest className="h-3.5 w-3.5 text-[#3fb950] shrink-0" />
                     <span className="truncate font-medium">{p.title}</span>
@@ -93,7 +94,7 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#848d96] italic py-2">No recent papers read.</p>
+              <p className="text-xs text-[#848d96] italic py-2">No recent papers opened.</p>
             )}
           </div>
         </div>
@@ -101,126 +102,136 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
         {/* --- CENTER FEED: COPILOT PROMPT & PAPER FEED (6 cols) --- */}
         <div className="lg:col-span-6 space-y-6">
           
-          {/* 🤖 GITHUB COPILOT PROMPT BOX (Inspired by Reference Image 3) */}
-          <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3 shadow-md">
+          {/* 🤖 HERO COPILOT PROMPT CARD */}
+          <div className="glass-card rounded-xl p-5 space-y-4 shadow-xl relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold text-[#f0f6fc]">Home</h2>
-              <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2 py-0.5 rounded-full border border-[#238636]/40 flex items-center">
-                <span className="w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1.5 animate-pulse"></span> Copilot Active
+              <div className="flex items-center space-x-2">
+                <Sparkles className="h-4 w-4 text-[#58a6ff]" />
+                <h2 className="text-base font-extrabold text-[#f0f6fc]">Academic Copilot Search</h2>
+              </div>
+              <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2.5 py-0.5 rounded-full border border-[#238636]/40 flex items-center glow-emerald">
+                <span className="w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1.5 animate-pulse"></span> Active
               </span>
             </div>
 
             {/* Input Box */}
-            <div className="bg-[#0d1117] border border-[#30363d] rounded-md p-3 space-y-3">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ask anything or type @ to filter research papers..."
-                className="w-full bg-transparent text-xs text-[#f0f6fc] placeholder-[#848d96] outline-none font-sans"
-              />
+            <div className="bg-[#0d1117]/90 border border-[#30363d] focus-within:border-[#58a6ff] rounded-lg p-3.5 space-y-3 transition-colors shadow-inner">
+              <div className="flex items-center space-x-2">
+                <Search className="h-4 w-4 text-[#58a6ff] shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Ask anything or filter research papers by title, topic, author..."
+                  className="w-full bg-transparent text-xs text-[#f0f6fc] placeholder-[#848d96] outline-none font-sans"
+                />
+              </div>
 
-              {/* Action Buttons Row (GitHub Style) */}
-              <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#30363d]/60">
-                <button className="flex items-center px-2.5 py-1 bg-[#21262d] border border-[#30363d] rounded text-[11px] font-medium text-[#c9d1d9] hover:bg-[#30363d]">
-                  <MessageSquare className="h-3 w-3 mr-1 text-[#58a6ff]" /> Ask AI
+              {/* Action Buttons Row */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#30363d]/60">
+                <button className="flex items-center px-3 py-1 bg-[#21262d] border border-[#30363d] rounded-md text-[11px] font-medium text-[#c9d1d9] hover:bg-[#30363d] hover:text-[#f0f6fc] transition-all">
+                  <MessageSquare className="h-3 w-3 mr-1.5 text-[#58a6ff]" /> Ask Gemini AI
                 </button>
                 <select
                   value={difficultyFilter}
                   onChange={(e) => setDifficultyFilter(e.target.value)}
-                  className="bg-[#21262d] border border-[#30363d] rounded text-[11px] font-medium text-[#c9d1d9] px-2 py-1 outline-none"
+                  className="bg-[#21262d] border border-[#30363d] rounded-md text-[11px] font-medium text-[#c9d1d9] px-2.5 py-1 outline-none cursor-pointer hover:border-[#58a6ff] transition-all"
                 >
                   <option value="all">All Difficulty Levels</option>
                   <option value="beginner">Beginner Level</option>
                   <option value="intermediate">Intermediate Level</option>
                   <option value="advanced">Advanced Level</option>
                 </select>
-                <span className="text-[11px] text-[#848d96] ml-auto font-mono">{displayedPapers.length} results</span>
+                <span className="text-[11px] text-[#848d96] ml-auto font-mono">{displayedPapers.length} research papers</span>
               </div>
             </div>
           </div>
 
           {/* PAPER CARDS FEED WITH TAB FILTER */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-[#30363d] pb-2">
-              <div className="flex items-center space-x-1 bg-[#161b22] p-1 rounded-md border border-[#30363d]">
+            <div className="flex items-center justify-between border-b border-[#30363d] pb-3">
+              <div className="flex items-center space-x-1.5 bg-[#161b22]/90 p-1 rounded-lg border border-[#30363d]">
                 <button
                   onClick={() => setFeedTab('all')}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors flex items-center ${
-                    feedTab === 'all' ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+                    feedTab === 'all' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
                   }`}
                 >
-                  <Sparkles className="h-3 w-3 mr-1 text-[#58a6ff]" /> Feed ({papers.length})
+                  Feed ({papers.length})
                 </button>
                 <button
                   onClick={() => setFeedTab('saved')}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors flex items-center ${
-                    feedTab === 'saved' ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+                    feedTab === 'saved' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
                   }`}
                 >
-                  <Bookmark className="h-3 w-3 mr-1 text-[#3fb950]" /> Bookmarks ({savedPapers.length})
+                  Bookmarks ({savedPapers.length})
                 </button>
                 <button
                   onClick={() => setFeedTab('history')}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors flex items-center ${
-                    feedTab === 'history' ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+                    feedTab === 'history' ? 'bg-[#21262d] text-[#f0f6fc] shadow-sm' : 'text-[#848d96] hover:text-[#c9d1d9]'
                   }`}
                 >
-                  <History className="h-3 w-3 mr-1 text-[#a371f7]" /> History ({readHistory.length})
+                  History ({readHistory.length})
                 </button>
               </div>
             </div>
 
+            {/* Paper Cards List */}
             {displayedPapers.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
                 {displayedPapers.map((paper) => (
                   <PaperCard
                     key={paper._id}
                     paper={paper}
-                    isSaved={!!savedPapers.find((savedPaper) => savedPaper._id === paper._id)}
+                    isSaved={savedPapers.some((s) => s._id === paper._id)}
                     onOpen={() => onOpenPaper(paper)}
-                    onToggleSave={(e) => onToggleSave(paper._id, e)}
+                    onToggleSave={() => onToggleSave(paper)}
                   />
                 ))}
               </div>
             ) : (
-              <div className="bg-[#161b22] border border-[#30363d] p-8 rounded-lg text-center space-y-2">
-                <p className="text-sm font-bold text-[#f0f6fc]">
-                  {feedTab === 'saved' ? 'No Saved Papers Yet' : feedTab === 'history' ? 'No History Yet' : 'No Papers Found'}
-                </p>
-                <p className="text-xs text-[#848d96]">
-                  {feedTab === 'saved'
-                    ? 'Bookmark interesting papers from the feed to view them here!'
-                    : 'Try adjusting your search query.'}
-                </p>
+              <div className="glass-card rounded-xl p-8 text-center space-y-3">
+                <Library className="h-8 w-8 text-[#848d96] mx-auto opacity-50" />
+                <p className="text-xs text-[#848d96]">No papers found matching your search filter.</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* --- RIGHT SIDEBAR: PROMOS & CHANGELOG (3 cols) --- */}
+        {/* --- RIGHT SIDEBAR: AI TUTOR STATUS & CHANGELOG (3 cols) --- */}
         <div className="lg:col-span-3 space-y-6">
-          {/* GitHub Universe Promo Box (Matching Image 3) */}
-          <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3 relative overflow-hidden">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-black tracking-wider text-[#a371f7] uppercase">PAPERPATH AI</span>
-              <span className="text-[10px] text-[#848d96]">v2.5</span>
+          <div className="glass-card rounded-xl p-5 space-y-4">
+            <div className="flex items-center space-x-2 pb-2 border-b border-[#30363d]">
+              <Cpu className="h-4 w-4 text-[#3fb950]" />
+              <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider">PAPERPATH AI ENGINE</h3>
             </div>
-            <p className="text-xs font-bold text-[#f0f6fc]">AI Tutor & Dual RAG Pipeline</p>
-            <p className="text-[11px] text-[#848d96] leading-relaxed">
-              Powered by Google Gemini 2.5 Flash & Local Ollama Qwen2.5 for local paper vector analysis.
-            </p>
+            
+            <div className="space-y-2 text-xs text-[#848d96]">
+              <div className="flex justify-between items-center py-1 border-b border-[#30363d]/40">
+                <span>LLM Model:</span>
+                <span className="font-mono text-[#3fb950] font-semibold">Gemini Flash</span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-[#30363d]/40">
+                <span>Embedding API:</span>
+                <span className="font-mono text-[#58a6ff] font-semibold">Gemini Embed-001</span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span>Vector RAG:</span>
+                <span className="font-mono text-[#a371f7] font-semibold">Active</span>
+              </div>
+            </div>
           </div>
 
-          {/* Latest Changelog Card */}
-          <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 space-y-3">
-            <h4 className="text-xs font-bold text-[#f0f6fc] border-b border-[#30363d] pb-2">Latest from Changelog</h4>
-            <div className="space-y-2 text-xs">
-              <p className="text-[#848d96] text-[10px]">18 hours ago</p>
-              <p className="text-[#c9d1d9] font-medium hover:text-[#58a6ff] cursor-pointer">
-                Gemini 2.5 Flash is now active in PaperPath AI Tutor
-              </p>
-            </div>
+          {/* Changelog */}
+          <div className="glass-card rounded-xl p-5 space-y-3">
+            <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider pb-2 border-b border-[#30363d]">
+              System Status
+            </h3>
+            <p className="text-xs text-[#c9d1d9] leading-relaxed">
+              Google Gemini API is active for both paper vector embeddings and instant AI tutor responses.
+            </p>
           </div>
         </div>
 

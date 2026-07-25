@@ -13,7 +13,7 @@ const testGeminiConnection = async (req, res) => {
         const llm = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         const response = await llm.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-flash-latest',
             contents: prompt,
         });
 

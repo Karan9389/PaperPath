@@ -2,96 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #090d13;
+    color: #e6edf3;
+    background-image: 
+      radial-gradient(at 10% 10%, rgba(35, 134, 54, 0.08) 0px, transparent 50%),
+      radial-gradient(at 90% 90%, rgba(88, 166, 255, 0.06) 0px, transparent 50%);
+    background-attachment: fixed;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #0d1117;
-  color: #e6edf3;
-}
-
-/* 🐙 GitHub Dark Design Tokens & Utilities */
-.gh-canvas {
-  background-color: #0d1117;
-}
-
-.gh-header {
-  background-color: #010409;
-  border-bottom: 1px solid #30363d;
-}
-
-.gh-card {
-  background-color: #161b22;
-  border: 1px solid #30363d;
-}
-
-.gh-card-hover {
-  transition: border-color 0.2s ease, transform 0.2s ease;
-}
-.gh-card-hover:hover {
-  border-color: #8b949e;
-  transform: translateY(-1px);
-}
-
-.gh-btn-primary {
-  background-color: #238636;
-  color: #ffffff;
+/* Glassmorphism & UI Accents */
+.glass-panel {
+  background: rgba(22, 27, 34, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(240, 246, 252, 0.1);
-  transition: background-color 0.15s ease;
-}
-.gh-btn-primary:hover {
-  background-color: #2ea043;
 }
 
-.gh-btn-secondary {
-  background-color: #21262d;
-  color: #c9d1d9;
-  border: 1px solid #30363d;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-.gh-btn-secondary:hover {
-  background-color: #30363d;
-  border-color: #8b949e;
-  color: #f0f6fc;
+.glass-card {
+  background: linear-gradient(135deg, rgba(22, 27, 34, 0.85) 0%, rgba(13, 17, 23, 0.95) 100%);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(48, 54, 61, 0.8);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.gh-badge-purple {
-  background-color: rgba(137, 87, 229, 0.15);
+.glass-card:hover {
+  border-color: rgba(88, 166, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4), 0 0 12px 0 rgba(88, 166, 255, 0.1);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 15px -3px rgba(63, 185, 80, 0.3);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 15px -3px rgba(163, 113, 247, 0.3);
+}
+
+/* Badge Enhancements */
+.badge-beginner {
+  background: rgba(35, 134, 54, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.35);
+}
+
+.badge-intermediate {
+  background: rgba(163, 113, 247, 0.15);
   color: #d2a8ff;
-  border: 1px solid rgba(137, 87, 229, 0.4);
+  border: 1px solid rgba(163, 113, 247, 0.35);
 }
 
-.gh-badge-green {
-  background-color: rgba(46, 160, 67, 0.15);
-  color: #56d364;
-  border: 1px solid rgba(46, 160, 67, 0.4);
-}
-
-.gh-grid-bg {
-  background-image: radial-gradient(rgba(46, 160, 67, 0.15) 1px, transparent 1px);
-  background-size: 24px 24px;
+.badge-advanced {
+  background: rgba(248, 81, 73, 0.15);
+  color: #ff7b72;
+  border: 1px solid rgba(248, 81, 73, 0.35);
 }
 
 /* Custom Sleek Dark Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: #090d13;
 }
 ::-webkit-scrollbar-thumb {
   background: #30363d;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8b949e;
+  background: #58a6ff;
 }
-
-

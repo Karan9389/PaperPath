@@ -148,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#090d13] text-[#e6edf3] font-sans selection:bg-[#238636]/30 selection:text-[#3fb950]">
       {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} currentView={view} />}
 
       <main className="max-w-7xl mx-auto">

@@ -2,16 +2,29 @@ import fs from 'fs';
 import csv from 'csv-parser';
 import paperModel from '../models/paper.js';
 import PDFParser from 'pdf2json';
+import { GoogleGenAI } from '@google/genai';
 
-// 🧠 Helper: Talk directly to your local Ollama on Port 11434
-async function getLocalEmbedding(text) {
-    const response = await fetch('http://localhost:11434/api/embeddings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'nomic-embed-text', prompt: text })
-    });
-    const data = await response.json();
-    return data.embedding;
+// 🧠 Helper: Generate vector embeddings using Google Gemini API (gemini-embedding-001)
+async function getGeminiEmbedding(text) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        console.warn("⚠️ GEMINI_API_KEY missing from .env. Returning empty embedding.");
+        return [];
+    }
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+        const response = await ai.models.embedContent({
+            model: 'gemini-embedding-001',
+            contents: text
+        });
+        if (response && response.embedding && response.embedding.values) {
+            return response.embedding.values;
+        }
+        return [];
+    } catch (err) {
+        console.error("⚠️ Gemini Embedding API Error:", err.message);
+        return [];
+    }
 }
 
 // ✂️ Helper: Chop massive PDFs into smaller, readable paragraphs
@@ -27,7 +40,7 @@ function chunkText(text, chunkSize = 1000) {
 export const processPdfAndIngest = async (pdfBuffer, title, pdfUrl = null) => {
     console.log(`🤖 Parsing PDF: ${title}...`);
     
-    // 🚀 THE FIX: Use pdf2json in "Text Only" mode (the '1' parameter)
+    // Use pdf2json in "Text Only" mode (the '1' parameter)
     const rawText = await new Promise((resolve, reject) => {
         const pdfParser = new PDFParser(null, 1);
         
@@ -43,13 +56,13 @@ export const processPdfAndIngest = async (pdfBuffer, title, pdfUrl = null) => {
     const cleanText = rawText.replace(/\r\n/g, ' ').trim();
     
     const textChunks = chunkText(cleanText, 1000);
-    console.log(`🤖 Processing ${textChunks.length} chunks via LOCAL OLLAMA...`);
+    console.log(`🤖 Processing ${textChunks.length} chunks via Gemini Embedding API...`);
 
     const embeddedChunks = [];
     for (let i = 0; i < textChunks.length; i++) {
-        const embedding = await getLocalEmbedding(textChunks[i]);
+        const embedding = await getGeminiEmbedding(textChunks[i]);
         embeddedChunks.push({ text: textChunks[i], embedding: embedding });
-        if (i % 50 === 0) console.log(`  ...embedded ${i}/${textChunks.length} chunks`);
+        if (i > 0 && i % 10 === 0) console.log(`  ...embedded ${i}/${textChunks.length} chunks`);
     }
 
     const newPaper = new paperModel({
@@ -69,7 +82,7 @@ export const processPdfAndIngest = async (pdfBuffer, title, pdfUrl = null) => {
 
 // 📊 CSV INGESTION PIPELINE
 export const processCsvStream = async (filePath) => {
-    console.log(`🤖 Processing CSV via LOCAL OLLAMA...`);
+    console.log(`🤖 Processing CSV via Gemini Embedding API...`);
     
     return new Promise((resolve, reject) => {
         let count = 0;
@@ -78,7 +91,7 @@ export const processCsvStream = async (filePath) => {
             .pipe(csv())
             .on('data', (data) => results.push(data))
             .on('end', async () => {
-                console.log(`Found ${results.length} rows. Starting local embeddings...`);
+                console.log(`Found ${results.length} rows. Starting Gemini embeddings...`);
                 
                 for (const row of results) {
                     const title = row.title || row.Title || 'Unknown CSV Paper';
@@ -86,9 +99,9 @@ export const processCsvStream = async (filePath) => {
                     
                     let embedding = [];
                     try {
-                        embedding = await getLocalEmbedding(abstract);
+                        embedding = await getGeminiEmbedding(abstract);
                     } catch (e) {
-                        console.warn(`Local embedding failed for ${title}, storing without embedding`);
+                        console.warn(`Gemini embedding failed for ${title}, storing without embedding`);
                     }
                     
                     const newPaper = new paperModel({
@@ -125,34 +138,33 @@ export function cosineSimilarity(vecA, vecB) {
 }
 
 // 🤖 PAPER-SCOPED AI TUTOR ANSWER GENERATION
-import { GoogleGenAI } from '@google/genai';
-
 export const answerPaperQuestion = async (paper, prompt) => {
     let relevantContext = "";
 
-    // 1. Extract context from paper chunks or abstract/content
+    // 1. Extract context from paper chunks or abstract/content using Gemini Embeddings
     if (paper.chunks && paper.chunks.length > 0) {
         try {
-            // Try to get query embedding from local Ollama
-            const queryEmbedding = await getLocalEmbedding(prompt);
+            const queryEmbedding = await getGeminiEmbedding(prompt);
             
-            // Calculate similarity score for each chunk
-            const scoredChunks = paper.chunks.map(chunk => {
-                const score = (chunk.embedding && chunk.embedding.length) 
-                    ? cosineSimilarity(queryEmbedding, chunk.embedding) 
-                    : 0;
-                return { text: chunk.text, score };
-            });
+            if (queryEmbedding && queryEmbedding.length > 0) {
+                // Calculate similarity score for each chunk
+                const scoredChunks = paper.chunks.map(chunk => {
+                    const score = (chunk.embedding && chunk.embedding.length) 
+                        ? cosineSimilarity(queryEmbedding, chunk.embedding) 
+                        : 0;
+                    return { text: chunk.text, score };
+                });
 
-            // Sort by score descending and pick top 3
-            scoredChunks.sort((a, b) => b.score - a.score);
-            const topChunks = scoredChunks.slice(0, 3).map(c => c.text).filter(Boolean);
+                // Sort by score descending and pick top 3
+                scoredChunks.sort((a, b) => b.score - a.score);
+                const topChunks = scoredChunks.slice(0, 3).map(c => c.text).filter(Boolean);
 
-            if (topChunks.length > 0) {
-                relevantContext = topChunks.join("\n\n---\n\n");
+                if (topChunks.length > 0) {
+                    relevantContext = topChunks.join("\n\n---\n\n");
+                }
             }
         } catch (err) {
-            console.log("Local embedding for query failed, using paper content/chunks directly:", err.message);
+            console.log("Gemini embedding for query failed, using paper content directly:", err.message);
         }
     }
 
@@ -171,9 +183,9 @@ export const answerPaperQuestion = async (paper, prompt) => {
         relevantContext = `Title: ${paper.title}\nAbstract: ${paper.abstract || 'No detailed content available.'}`;
     }
 
-    const systemPrompt = `You are PaperPath AI Tutor, an intelligent and encouraging academic assistant.
+    const systemPrompt = `You are PaperPath AI Tutor, an expert academic assistant for research paper learning.
 Answer the user's question about the research paper titled "${paper.title}".
-Rely on the provided context below. Explain concepts simply and clearly.
+Rely on the provided context below. Explain concepts simply, accurately, and clearly.
 
 CONTEXT:
 ${relevantContext}
@@ -181,48 +193,34 @@ ${relevantContext}
 USER QUESTION:
 ${prompt}
 
-Provide a helpful, well-structured response using Markdown formatting.`;
+OUTPUT FORMATTING RULES:
+1. Always structure your answer using clean, standard Markdown.
+2. Put blank lines (double newlines) before and after all headers (e.g. ### Header Name).
+3. Put blank lines between list items and paragraphs so text does not run together.
+4. Use bullet points (* or -) for key takeaways and bold text (**key concept**) for emphasis.
+5. End with a short summary or offer to clarify further.`;
 
-    // 2. Try Gemini API first (using GEMINI_API_KEY from .env)
+    // 2. Request response from Gemini API (using GEMINI_API_KEY from .env)
     const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
-        try {
-            console.log(`🤖 Requesting response from Gemini API for paper "${paper.title}"...`);
-            const llm = new GoogleGenAI({ apiKey });
-            const response = await llm.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: systemPrompt,
-            });
-
-            if (response && response.text) {
-                return response.text;
-            }
-        } catch (geminiError) {
-            console.error("⚠️ Gemini API generation failed, trying local Ollama fallback...", geminiError.message);
-        }
+    if (!apiKey) {
+        return `Based on the paper "${paper.title}":\n\n${paper.abstract || 'No abstract available.'}\n\n*Note: GEMINI_API_KEY is not set in .env.*`;
     }
 
-    // 3. Fallback to Local Ollama Generation
     try {
-        console.log(`🤖 Requesting response from local Ollama model qwen2.5:0.5b...`);
-        const ollamaRes = await fetch('http://localhost:11434/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: 'qwen2.5:0.5b',
-                prompt: systemPrompt,
-                stream: false
-            })
+        console.log(`🤖 Requesting response from Gemini API for paper "${paper.title}"...`);
+        const llm = new GoogleGenAI({ apiKey });
+        const response = await llm.models.generateContent({
+            model: 'gemini-flash-latest',
+            contents: systemPrompt,
         });
 
-        if (ollamaRes.ok) {
-            const data = await ollamaRes.json();
-            if (data.response) return data.response;
+        if (response && response.text) {
+            return response.text;
         }
-    } catch (ollamaErr) {
-        console.error("⚠️ Local Ollama generation also failed:", ollamaErr.message);
+    } catch (geminiError) {
+        console.error("⚠️ Gemini API generation failed:", geminiError.message);
+        return `Based on the paper "${paper.title}":\n\n${paper.abstract || 'No abstract available.'}\n\n*Note: AI response generation failed (${geminiError.message}).*`;
     }
 
-    // 4. Final safety fallback
-    return `Based on the paper "${paper.title}":\n\n${paper.abstract || 'No abstract available.'}\n\n*Note: Could not reach AI models for detailed question answering.*`;
+    return `Based on the paper "${paper.title}":\n\n${paper.abstract || 'No abstract available.'}`;
 };
