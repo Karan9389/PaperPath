@@ -14,8 +14,11 @@ const upload = multer({
 // --- REAL MONGODB GET ROUTES ---
 router.get('/', async (req, res) => {
     try {
-        // Fetch the newest 50 papers from MongoDB, excluding heavy vector arrays from chunks
-        const papers = await paperModel.find({}, '-chunks.embedding').sort({ createdAt: -1 }).limit(100);
+        // Only fetch active (non-archived) research papers, newest first
+        const papers = await paperModel.find(
+            { category: { $nin: ['Archived', 'CSV'] } },
+            '-chunks.embedding'
+        ).sort({ createdAt: -1 }).limit(100);
         res.json({ data: papers });
     } catch (error) {
         console.error("❌ Error fetching papers:", error);

@@ -79,20 +79,34 @@ export default function PaperCard({ paper, isSaved, onOpen, onToggleSave }) {
 
       {/* Card Action Footer */}
       <div className="px-5 py-3 bg-[#0d1117]/80 border-t border-[#30363d]/80 flex items-center justify-between group-hover:bg-[#161b22] transition-colors">
-        <span className="text-xs font-semibold text-[#58a6ff] group-hover:text-[#79c0ff] flex items-center">
+        <span className="text-xs font-semibold text-[#58a6ff] group-hover:text-[#79c0ff] flex items-center cursor-pointer">
           <BookOpen className="h-3.5 w-3.5 mr-1.5 text-[#3fb950]" /> Inspect & Ask AI
         </span>
 
-        <a
-          href={`https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title || '')}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="text-[10px] font-bold text-[#3fb950] bg-[#238636]/15 px-2.5 py-1 rounded-md border border-[#238636]/40 hover:bg-[#238636]/30 transition-colors flex items-center"
-          title="Search on Google Scholar"
-        >
-          <GraduationCap className="h-3 w-3 mr-1" /> Scholar
-        </a>
+        <div className="flex items-center gap-1.5">
+          {paper.pdfUrl && (
+            <a
+              href={paper.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[10px] font-bold text-[#79c0ff] bg-[#58a6ff]/10 px-2.5 py-1 rounded-md border border-[#58a6ff]/40 hover:bg-[#58a6ff]/20 transition-colors flex items-center"
+              title="View PDF"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" /> PDF
+            </a>
+          )}
+          <a
+            href={`https://scholar.google.com/scholar?q=${encodeURIComponent(paper.title || '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-[10px] font-bold text-[#3fb950] bg-[#238636]/15 px-2.5 py-1 rounded-md border border-[#238636]/40 hover:bg-[#238636]/30 transition-colors flex items-center"
+            title="Search on Google Scholar"
+          >
+            <GraduationCap className="h-3 w-3 mr-1" /> Scholar
+          </a>
+        </div>
       </div>
     </div>
   );
