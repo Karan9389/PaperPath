@@ -1,20 +1,13 @@
+// ⚠️  MUST be first — loads dotenv before any other module reads process.env
+import './src/config/env.js';
+
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import connectDB from './src/config/db.js';
-import dotenv from 'dotenv';
 import authRouters from './src/routes/authRouters.js';
 import userRouters from './src/routes/userRoutes.js';
-import aiRoute from './src/routes/aiRoutes.js'
-import paperRouter from './src/routes/paperRoutes.js'; // 1. Import your new router layer
-// import paperRoutes from './src/routes/'
-const envPath = path.resolve(process.cwd(), '.env');
-const fallbackEnvPath = path.resolve(process.cwd(), '../.env');
-const envResult = dotenv.config({ path: envPath });
-
-if (envResult.error) {
-    dotenv.config({ path: fallbackEnvPath });
-}
+import aiRoute from './src/routes/aiRoutes.js';
+import paperRouter from './src/routes/paperRoutes.js';
 
 const app = express();
 app.use(cors());
