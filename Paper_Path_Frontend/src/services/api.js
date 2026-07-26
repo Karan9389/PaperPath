@@ -46,13 +46,23 @@ async function request(endpoint, { method = 'GET', body } = {}) {
 export const authService = {
   login: async ({ email, password }) => {
     const result = await request('/auth/login', { method: 'POST', body: { email, password } });
-    persistToken(result);
+    // Only persist token if account is already verified (no OTP needed)
+    if (!result.requiresOtp) persistToken(result);
     return result;
   },
   register: async ({ name, email, password }) => {
     const result = await request('/auth/register', { method: 'POST', body: { name, email, password } });
-    persistToken(result);
+    // Only persist token if OTP is not required (e.g. fallback/demo mode)
+    if (!result.requiresOtp) persistToken(result);
     return result;
+  },
+  verifyOtp: async ({ email, otp }) => {
+    const result = await request('/auth/verify-otp', { method: 'POST', body: { email, otp } });
+    persistToken(result); // OTP passed → store the real JWT
+    return result;
+  },
+  resendOtp: async ({ email }) => {
+    return request('/auth/resend-otp', { method: 'POST', body: { email } });
   },
   getProfile: async () => {
     return request('/auth/profile');
@@ -61,6 +71,7 @@ export const authService = {
     persistToken(null);
   },
 };
+
 
 export const paperService = {
   list: async () => request('/papers'),

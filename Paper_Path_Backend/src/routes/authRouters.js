@@ -1,13 +1,16 @@
 import express from 'express';
-import {registerUser, loginUser, getUserProfile} from '../controllers/authController.js';
+import { registerUser, loginUser, verifyOtp, resendOtp, getUserProfile } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-//divert the requests to the controller functions as per the api endpoints.
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+// Public routes
+router.post('/register',    registerUser);
+router.post('/login',       loginUser);
+router.post('/verify-otp',  verifyOtp);
+router.post('/resend-otp',  resendOtp);
 
-//Private route (Middleware protect profile route)
-router.get('/profile',protect, getUserProfile);
+// Private route (requires JWT)
+router.get('/profile', protect, getUserProfile);
+
 export default router;

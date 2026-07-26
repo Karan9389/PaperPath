@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import LoginView from './components/LoginView';
+import OtpView from './components/OtpView';
 import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
 import ProfileView from './components/ProfileView';
@@ -17,6 +18,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authError, setAuthError] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');   // email waiting for OTP
+  const [otpError, setOtpError] = useState('');           // error from verifyOtp
   const { toasts, toast, removeToast } = useToast();
 
   // 🔄 Check stored session token on mount
@@ -41,10 +44,19 @@ export default function App() {
     setAuthError('');
 
     try {
-      const loggedUser = await authService.login({ email, password });
-      setUser(loggedUser);
-      setView('dashboard');
-      toast.success(`Welcome back, ${loggedUser.name || 'Researcher'}! 👋`);
+      const result = await authService.login({ email, password });
+
+      if (result.requiresOtp) {
+        // Account exists but email not verified — show OTP screen
+        setPendingEmail(result.email || email);
+        setOtpError('');
+        setView('otp');
+        toast.info(`Verification code sent to ${result.email || email} 📧`);
+      } else {
+        setUser(result);
+        setView('dashboard');
+        toast.success(`Welcome back, ${result.name || 'Researcher'}! 👋`);
+      }
     } catch (error) {
       const msg = error.message || 'Login failed. Please try again.';
       setAuthError(msg);
@@ -60,16 +72,54 @@ export default function App() {
     setAuthError('');
 
     try {
-      const createdUser = await authService.register({ name, email, password });
-      setUser(createdUser);
-      setView('dashboard');
-      toast.success(`Account created! A verification email has been sent to ${email} 📧`);
+      const result = await authService.register({ name, email, password });
+
+      if (result.requiresOtp) {
+        // Normal flow — OTP sent, show verification screen
+        setPendingEmail(result.email || email);
+        setOtpError('');
+        setView('otp');
+        toast.success(`Account created! Verification code sent to ${result.email || email} 📧`);
+      } else {
+        // Fallback/demo mode — no OTP needed
+        setUser(result);
+        setView('dashboard');
+      }
     } catch (error) {
       const msg = error.message || 'Registration failed. Please try again.';
       setAuthError(msg);
       toast.error(msg);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  /** Called by OtpView when user submits a code. */
+  const handleOtpSuccess = async (otp) => {
+    setIsLoading(true);
+    setOtpError('');
+    try {
+      const verifiedUser = await authService.verifyOtp({ email: pendingEmail, otp });
+      setUser(verifiedUser);
+      setPendingEmail('');
+      setView('dashboard');
+      toast.success(`Email verified! Welcome, ${verifiedUser.name || 'Researcher'}! 🎉`);
+    } catch (error) {
+      const msg = error.message || 'Invalid or expired OTP.';
+      setOtpError(msg);
+      toast.error(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /** Called by OtpView resend button. */
+  const handleOtpResend = async () => {
+    try {
+      await authService.resendOtp({ email: pendingEmail });
+      toast.info(`New verification code sent to ${pendingEmail}`);
+    } catch (error) {
+      toast.error(error.message || 'Failed to resend code.');
     }
   };
 
@@ -179,6 +229,16 @@ export default function App() {
                   authMode={authMode}
                   setAuthMode={setAuthMode}
                   authError={authError}
+                />
+              );
+            case 'otp':
+              return (
+                <OtpView
+                  email={pendingEmail}
+                  onSuccess={handleOtpSuccess}
+                  onResend={handleOtpResend}
+                  isLoading={isLoading}
+                  error={otpError}
                 />
               );
             case 'dashboard':
