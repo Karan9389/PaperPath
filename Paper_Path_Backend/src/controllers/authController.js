@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
+import transporter from '../config/mailer.js';
 
 const generateToken = (payload) => {
     const secret = process.env.JWT_SECRET || 'paperpath-secret';
@@ -71,6 +72,29 @@ const registerUser = async (req, res) => {
 
         if (user) {
             saveFallbackUser(user);
+
+            // Send welcome / verification email (fire-and-forget)
+            const verificationToken = jwt.sign(
+                { id: user._id, email: user.email },
+                process.env.JWT_SECRET || 'paperpath-secret',
+                { expiresIn: '24h' }
+            );
+            const verifyUrl = `${process.env.VITE_API_BASE_URL || 'http://localhost:3001/api'}/auth/verify-email?token=${verificationToken}`;
+
+            transporter.sendMail({
+                from: `"PaperPath 📚" <${process.env.SENDER_EMAIL}>`,
+                to: email,
+                subject: '✅ Verify your PaperPath account',
+                html: `
+                    <div style="font-family:Inter,sans-serif;max-width:520px;margin:auto;background:#0d1117;color:#e6edf3;border-radius:12px;border:1px solid #30363d;padding:40px 32px">
+                        <h1 style="font-size:22px;font-weight:700;margin:0 0 8px">Welcome to PaperPath, ${user.name || 'Researcher'}! 🎉</h1>
+                        <p style="color:#8b949e;font-size:14px;margin:0 0 28px">You're one click away from exploring thousands of research papers.</p>
+                        <a href="${verifyUrl}" style="display:inline-block;padding:12px 28px;background:#238636;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px">Verify Email Address</a>
+                        <p style="color:#545d68;font-size:12px;margin:28px 0 0">This link expires in 24 hours. If you didn't create this account, you can safely ignore this email.</p>
+                    </div>
+                `,
+            }).catch((err) => console.error('[Mailer] Failed to send verification email:', err.message));
+
             return res.status(201).json(buildUserPayload(user));
         }
 

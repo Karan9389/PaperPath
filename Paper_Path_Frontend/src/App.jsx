@@ -5,6 +5,7 @@ import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
 import ProfileView from './components/ProfileView';
 import { authService, libraryService, paperService } from './services/api';
+import { ToastContainer, useToast } from './components/Toast';
 
 export default function App() {
   const [view, setView] = useState('login');
@@ -16,6 +17,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authError, setAuthError] = useState('');
+  const { toasts, toast, removeToast } = useToast();
 
   // 🔄 Check stored session token on mount
   useEffect(() => {
@@ -42,8 +44,11 @@ export default function App() {
       const loggedUser = await authService.login({ email, password });
       setUser(loggedUser);
       setView('dashboard');
+      toast.success(`Welcome back, ${loggedUser.name || 'Researcher'}! 👋`);
     } catch (error) {
-      setAuthError(error.message || 'Login failed. Please try again.');
+      const msg = error.message || 'Login failed. Please try again.';
+      setAuthError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -58,8 +63,11 @@ export default function App() {
       const createdUser = await authService.register({ name, email, password });
       setUser(createdUser);
       setView('dashboard');
+      toast.success(`Account created! A verification email has been sent to ${email} 📧`);
     } catch (error) {
-      setAuthError(error.message || 'Registration failed. Please try again.');
+      const msg = error.message || 'Registration failed. Please try again.';
+      setAuthError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +80,7 @@ export default function App() {
     setAuthError('');
     setAuthMode('login');
     setView('login');
+    toast.info('You have been logged out. See you soon! 👋');
   };
 
   const fetchDashboardData = async () => {
@@ -131,8 +140,10 @@ export default function App() {
       try {
         await libraryService.unsavePaper(paperId);
         setSavedPapers((prev) => prev.filter((sp) => sp._id !== paperId));
+        toast.info('Paper removed from your library.');
       } catch (error) {
         console.error('Could not unsave paper', error);
+        toast.error('Failed to remove paper. Please try again.');
       }
       return;
     }
@@ -145,8 +156,10 @@ export default function App() {
     try {
       await libraryService.savePaper(paperId);
       setSavedPapers((prev) => [...prev, paperToSave]);
+      toast.success('Paper saved to your library! 📚');
     } catch (error) {
       console.error('Could not save paper', error);
+      toast.error('Failed to save paper. Please try again.');
     }
   };
 
@@ -212,6 +225,9 @@ export default function App() {
           }
         })()}
       </main>
+
+      {/* Global toast notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
