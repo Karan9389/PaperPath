@@ -2,33 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ===== PREMIUM DESIGN TOKENS ===== */
+/* ===== APPLE iOS TRUE GLASSMORPHISM & THEME TOKENS ===== */
 :root {
-  --bg-base:       #070b11;
-  --bg-surface:    #0d1117;
-  --bg-raised:     #161b22;
-  --bg-overlay:    #1c2128;
+  /* LIGHT MODE TOKENS (High Contrast) */
+  --bg-base:       #f0f0f5; /* Distinct iOS Light Gray background */
+  --bg-surface:    rgba(255, 255, 255, 0.85); /* Mostly opaque white for cards */
+  --bg-raised:     rgba(255, 255, 255, 1); /* Pure white on hover */
+  --bg-overlay:    rgba(255, 255, 255, 0.6); /* Slightly more transparent for panels */
 
-  --border-subtle: rgba(48, 54, 61, 0.6);
-  --border-muted:  rgba(48, 54, 61, 1);
-  --border-active: rgba(99, 179, 237, 0.5);
+  --border-subtle: rgba(0, 0, 0, 0.1); /* Darker subtle border */
+  --border-muted:  rgba(0, 0, 0, 0.15);
+  --border-active: rgba(0, 122, 255, 0.5);
 
-  --text-primary:  #e6edf3;
-  --text-secondary:#8b949e;
-  --text-muted:    #545d68;
+  --text-primary:  #1c1c1e; /* Pure dark text */
+  --text-secondary: rgba(60, 60, 67, 0.85);
+  --text-muted:    rgba(60, 60, 67, 0.5);
 
-  /* Brand Palette */
-  --accent-blue:   #58a6ff;
-  --accent-blue-bright: #79c0ff;
-  --accent-green:  #3fb950;
-  --accent-purple: #a371f7;
-  --accent-orange: #e3b341;
-  --accent-red:    #f85149;
+  /* iOS System Colors (Light) */
+  --accent-blue:   #007aff;
+  --accent-blue-bright: #34c759;
+  --accent-green:  #34c759;
+  --accent-purple: #af52de;
+  --accent-orange: #ff9500;
+  --accent-red:    #ff3b30;
 
   /* Glows */
-  --glow-blue:   0 0 20px -4px rgba(88, 166, 255, 0.35);
-  --glow-green:  0 0 20px -4px rgba(63, 185, 80, 0.35);
-  --glow-purple: 0 0 20px -4px rgba(163, 113, 247, 0.35);
+  --glow-blue:   0 0 24px -6px rgba(0, 122, 255, 0.15);
+  --glow-green:  0 0 24px -6px rgba(52, 199, 89, 0.15);
+  --glow-purple: 0 0 24px -6px rgba(175, 82, 222, 0.15);
+}
+
+.dark {
+  /* DARK MODE TOKENS (Deep Glassmorphism) */
+  --bg-base:       #000000; /* Pure black background */
+  --bg-surface:    rgba(28, 28, 30, 0.4); /* High transparency for deep glass effect */
+  --bg-raised:     rgba(44, 44, 46, 0.6);
+  --bg-overlay:    rgba(28, 28, 30, 0.25);
+
+  --border-subtle: rgba(255, 255, 255, 0.12); /* Distinguishable borders */
+  --border-muted:  rgba(255, 255, 255, 0.2);
+  --border-active: rgba(10, 132, 255, 0.5);
+
+  --text-primary:  #ffffff;
+  --text-secondary: rgba(235, 235, 245, 0.75);
+  --text-muted:    rgba(235, 235, 245, 0.45);
+
+  /* iOS System Colors (Dark) */
+  --accent-blue:   #0a84ff;
+  --accent-blue-bright: #64d2ff;
+  --accent-green:  #30d158;
+  --accent-purple: #bf5af2;
+  --accent-orange: #ff9f0a;
+  --accent-red:    #ff453a;
+
+  /* Soft Glows (Slightly brighter in dark mode for contrast) */
+  --glow-blue:   0 0 32px -4px rgba(10, 132, 255, 0.35);
+  --glow-green:  0 0 32px -4px rgba(48, 209, 88, 0.35);
+  --glow-purple: 0 0 32px -4px rgba(191, 90, 242, 0.35);
 }
 
 @layer base {
@@ -37,122 +67,105 @@
   }
 
   body {
-    font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* SF Pro / System font stack for Apple aesthetic */
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: var(--bg-base);
     color: var(--text-primary);
-    /* Subtle ambient glow in corners */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    
+    /* Stronger ambient glow to give depth in dark mode */
     background-image:
-      radial-gradient(ellipse at 5% 0%,   rgba(88, 166, 255, 0.05) 0px, transparent 55%),
-      radial-gradient(ellipse at 95% 0%,  rgba(63, 185, 80, 0.04) 0px, transparent 45%),
-      radial-gradient(ellipse at 50% 100%, rgba(163, 113, 247, 0.04) 0px, transparent 50%);
+      radial-gradient(circle at 10% 10%, rgba(10, 132, 255, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(191, 90, 242, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(48, 209, 88, 0.02) 0%, transparent 60%);
     background-attachment: fixed;
+    letter-spacing: -0.01em;
   }
 
   /* Selection color */
   ::selection {
-    background: rgba(88, 166, 255, 0.25);
-    color: var(--accent-blue-bright);
+    background: rgba(10, 132, 255, 0.3);
+    color: inherit;
   }
 }
 
-/* ===== GLASS COMPONENTS ===== */
+/* ===== iOS TRUE GLASS COMPONENTS ===== */
 .glass-panel {
-  background: rgba(22, 27, 34, 0.7);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  background: var(--bg-overlay);
+  backdrop-filter: blur(80px) saturate(200%);
+  -webkit-backdrop-filter: blur(80px) saturate(200%);
   border: 1px solid var(--border-subtle);
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.15);
 }
 
 .glass-card {
-  background: linear-gradient(
-    150deg,
-    rgba(22, 27, 34, 0.9) 0%,
-    rgba(13, 17, 23, 0.97) 100%
-  );
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border-muted);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--bg-surface);
+  backdrop-filter: blur(80px) saturate(200%);
+  -webkit-backdrop-filter: blur(80px) saturate(200%);
+  border: 1px solid var(--border-subtle);
+  transition: background-color 0.3s ease, transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08);
 }
 
 .glass-card:hover {
-  border-color: rgba(88, 166, 255, 0.35);
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 32px -8px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(88, 166, 255, 0.08),
-    0 0 16px -6px rgba(88, 166, 255, 0.15);
+  background: var(--bg-raised);
+  transform: scale(1.01);
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.15);
+  border-color: var(--border-muted);
 }
 
 /* ===== GLOWS ===== */
 .glow-blue   { box-shadow: var(--glow-blue); }
 .glow-emerald{ box-shadow: var(--glow-green); }
 .glow-indigo { box-shadow: var(--glow-purple); }
-.glow-orange { box-shadow: 0 0 20px -4px rgba(227, 179, 65, 0.35); }
 
-/* ===== DIFFICULTY BADGES ===== */
+/* ===== DIFFICULTY BADGES (iOS Style Pills) ===== */
 .badge-beginner {
-  background: rgba(63, 185, 80, 0.12);
-  color: #4ade80;
-  border: 1px solid rgba(63, 185, 80, 0.3);
-  letter-spacing: 0.08em;
+  background: rgba(48, 209, 88, 0.15);
+  color: var(--accent-green);
+}
+.dark .badge-beginner {
+  background: rgba(48, 209, 88, 0.2);
 }
 
 .badge-intermediate {
-  background: rgba(88, 166, 255, 0.12);
-  color: #79c0ff;
-  border: 1px solid rgba(88, 166, 255, 0.3);
-  letter-spacing: 0.08em;
+  background: rgba(0, 122, 255, 0.15);
+  color: var(--accent-blue);
+}
+.dark .badge-intermediate {
+  background: rgba(10, 132, 255, 0.2);
+  color: var(--accent-blue-bright);
 }
 
 .badge-advanced {
-  background: rgba(248, 81, 73, 0.12);
-  color: #fc8888;
-  border: 1px solid rgba(248, 81, 73, 0.3);
-  letter-spacing: 0.08em;
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--accent-red);
 }
-
-/* ===== ANIMATED GRADIENT BORDER ===== */
-.gradient-border-top {
-  position: relative;
-}
-.gradient-border-top::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  top: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #58a6ff, #3fb950, #a371f7, transparent);
-  opacity: 0.6;
+.dark .badge-advanced {
+  background: rgba(255, 69, 58, 0.2);
 }
 
 /* ===== CUSTOM SCROLLBAR ===== */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(48, 54, 61, 0.8);
+  background: var(--border-muted);
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(88, 166, 255, 0.6); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* ===== FOCUS RING ===== */
+/* ===== FOCUS RING (iOS Style) ===== */
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid rgba(88, 166, 255, 0.5);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 3px;
+  border-radius: 8px;
 }
 
 /* ===== UTILITY ===== */
-.text-gradient-blue-green {
-  background: linear-gradient(135deg, #58a6ff 0%, #3fb950 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-purple-blue {
-  background: linear-gradient(135deg, #a371f7 0%, #58a6ff 100%);
+.text-gradient-premium {
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -163,22 +176,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #3fb950;
+  background: var(--accent-green);
   animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(0.85); }
+  50%       { opacity: 0.6; transform: scale(0.9); }
 }
 
 /* Shimmer loader */
 .shimmer {
-  background: linear-gradient(90deg, rgba(22,27,34,0.9) 25%, rgba(30,38,48,0.8) 50%, rgba(22,27,34,0.9) 75%);
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-raised) 50%, var(--bg-surface) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  animation: shimmer 1.5s infinite ease-in-out;
 }
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

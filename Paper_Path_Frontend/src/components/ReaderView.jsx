@@ -6,8 +6,8 @@ import MarkdownMessage from './MarkdownMessage';
 export default function ReaderView({ paper, isSaved = false, onToggleSave, onBack }) {
   const [paperDetails, setPaperDetails] = useState(paper);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
-  const [iframeLoaded, setIframeLoaded] = useState(false); // tracks PDF iframe load
-  const [viewMode, setViewMode] = useState('pdf'); // 'pdf' | 'text'
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [viewMode, setViewMode] = useState('pdf');
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([
     { role: 'ai', text: `Hello! I am **PaperPath AI Tutor**. Ask me anything about **"${paper.title}"**!` },
@@ -23,7 +23,7 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
   ];
 
   useEffect(() => {
-    setIframeLoaded(false); // reset skeleton each time paper changes
+    setIframeLoaded(false);
     const loadFullPaper = async () => {
       if (paper._id && (!paper.content && !paper.chunks?.length)) {
         setIsLoadingDetails(true);
@@ -70,9 +70,7 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
 
   const currentDiff = paperDetails.difficultyLevel || paperDetails.difficulty || 'Intermediate';
   const authors = paperDetails.authors || 'Unknown Author';
-  const category = paperDetails.category || 'General';
 
-  // Smart PDF URL resolver
   const getPdfUrl = () => {
     if (paperDetails.pdfUrl) return paperDetails.pdfUrl;
     const titleLower = (paperDetails.title || '').toLowerCase();
@@ -84,7 +82,6 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
   };
 
   const rawPdfUrl = getPdfUrl();
-
   const getEmbedPdfUrl = () => {
     if (rawPdfUrl) {
       if (rawPdfUrl.startsWith('http://localhost:3001/uploads') || rawPdfUrl.startsWith('/uploads')) {
@@ -99,124 +96,72 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
   };
 
   const embedPdfUrl = getEmbedPdfUrl();
-  const googleScholarUrl = `https://scholar.google.com/scholar?q=${encodeURIComponent(paperDetails.title || '')}`;
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-3.5rem)] bg-[#090d13] overflow-hidden">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-3.5rem)] bg-[var(--bg-base)] overflow-hidden font-sans">
       
       {/* 📄 LEFT COLUMN: READER VIEW */}
-      <div className="flex-1 flex flex-col border-r border-[#30363d] overflow-hidden bg-[#0d1117]">
+      <div className="flex-1 flex flex-col border-r border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-base)]">
         
-        {/* Reader Top Action Bar */}
-        <div className="h-14 border-b border-[#30363d] bg-[#161b22]/90 backdrop-blur-md px-4 flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3 truncate">
+        {/* Reader Top Action Bar (iOS Toolbar Style) */}
+        <div className="h-[60px] border-b border-[var(--border-subtle)] bg-[var(--bg-overlay)] backdrop-blur-xl px-4 flex items-center justify-between shrink-0 z-10">
+          <div className="flex items-center space-x-3 truncate flex-1 pr-4">
             <button
               onClick={onBack}
-              className="p-1.5 rounded-lg text-[#848d96] hover:text-[#f0f6fc] hover:bg-[#21262d] transition-colors flex items-center text-xs font-semibold"
+              className="p-2 rounded-full text-[var(--accent-blue)] hover:bg-[var(--bg-raised)] transition-colors flex items-center text-[15px] font-medium"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" /> Back
+              <ArrowLeft className="h-5 w-5 mr-1" /> Back
             </button>
-            <div className="h-4 w-[1px] bg-[#30363d]" />
-            <h1 className="text-xs font-bold text-[#f0f6fc] truncate max-w-[300px] lg:max-w-[500px]">
+            <div className="h-5 w-[1px] bg-[var(--border-muted)]" />
+            <h1 className="text-sm font-bold text-white truncate">
               {paperDetails.title}
             </h1>
           </div>
 
-          <div className="flex items-center space-x-2">
-            {/* View Mode Toggle */}
-            <div className="flex items-center bg-[#0d1117] p-1 rounded-lg border border-[#30363d]">
+          <div className="flex items-center space-x-4">
+            {/* View Mode Toggle (iOS Segmented Control) */}
+            <div className="flex items-center bg-[var(--bg-surface)] p-1 rounded-full border border-[var(--border-subtle)] shadow-sm">
               <button
                 onClick={() => setViewMode('pdf')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center transition-all ${
-                  viewMode === 'pdf' ? 'bg-[#21262d] text-[#58a6ff]' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold flex items-center transition-all ${
+                  viewMode === 'pdf' ? 'bg-[#3a3a3c] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:text-white'
                 }`}
               >
-                <BookOpen className="h-3 w-3 mr-1" /> PDF Reader
+                <BookOpen className="h-3.5 w-3.5 mr-1.5" /> PDF
               </button>
               <button
                 onClick={() => setViewMode('text')}
-                className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center transition-all ${
-                  viewMode === 'text' ? 'bg-[#21262d] text-[#58a6ff]' : 'text-[#848d96] hover:text-[#c9d1d9]'
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold flex items-center transition-all ${
+                  viewMode === 'text' ? 'bg-[#3a3a3c] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:text-white'
                 }`}
               >
-                <FileText className="h-3 w-3 mr-1" /> Text Body
+                <FileText className="h-3.5 w-3.5 mr-1.5" /> Text
               </button>
             </div>
 
             <button
               onClick={onToggleSave}
-              className={`p-2 rounded-lg transition-all ${
-                isSaved ? 'bg-[#a371f7]/20 text-[#d2a8ff] border border-[#8957e5]/40' : 'text-[#848d96] hover:bg-[#21262d]'
+              className={`p-2 rounded-full transition-all ${
+                isSaved ? 'text-[var(--accent-purple)] bg-[rgba(191,90,242,0.15)]' : 'text-[var(--accent-blue)] hover:bg-[var(--bg-raised)]'
               }`}
             >
-              <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
+              <Bookmark className="h-5 w-5" fill={isSaved ? 'currentColor' : 'none'} />
             </button>
           </div>
         </div>
 
         {/* Reader Display Container */}
         {viewMode === 'pdf' ? (
-          <div className="flex-1 bg-[#161b22] relative overflow-hidden">
+          <div className="flex-1 bg-[var(--bg-surface)] relative overflow-hidden">
             {embedPdfUrl ? (
               <>
-                {/* ── PDF Skeleton — visible until iframe fires onLoad ── */}
                 {!iframeLoaded && (
-                  <div style={{
-                    position: 'absolute', inset: 0, zIndex: 10,
-                    background: '#161b22',
-                    display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', padding: '32px 24px', gap: '16px',
-                    overflowY: 'hidden',
-                  }}>
-                    {/* Fake toolbar */}
-                    <div style={{ width: '100%', maxWidth: '720px', display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                      <div className="shimmer" style={{ width: '36px', height: '36px', borderRadius: '8px', flexShrink: 0 }} />
-                      <div className="shimmer" style={{ flex: 1, height: '28px', borderRadius: '6px' }} />
-                      <div className="shimmer" style={{ width: '60px', height: '28px', borderRadius: '6px', flexShrink: 0 }} />
-                    </div>
-
-                    {/* Fake PDF pages */}
-                    {[1, 0.92, 0.88].map((opacity, pi) => (
-                      <div key={pi} style={{
-                        width: '100%', maxWidth: '680px',
-                        background: 'rgba(22,27,34,0.9)',
-                        border: '1px solid rgba(48,54,61,0.5)',
-                        borderRadius: '8px',
-                        padding: '28px 32px',
-                        display: 'flex', flexDirection: 'column', gap: '10px',
-                        opacity,
-                      }}>
-                        {/* Page header */}
-                        <div className="shimmer" style={{ width: '55%', height: '18px', borderRadius: '4px' }} />
-                        <div className="shimmer" style={{ width: '35%', height: '11px', borderRadius: '4px' }} />
-                        <div style={{ height: '1px', background: 'rgba(48,54,61,0.6)', margin: '4px 0' }} />
-                        {/* Paragraph lines */}
-                        {[100,100,94,100,87,100,76].map((w, i) => (
-                          <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
-                        ))}
-                        <div style={{ height: '8px' }} />
-                        {[100,100,91,100,83].map((w, i) => (
-                          <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
-                        ))}
-                        {pi === 0 && (
-                          <>
-                            <div style={{ height: '8px' }} />
-                            {[100,96,100,78].map((w, i) => (
-                              <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    ))}
-
-                    {/* Loading label */}
-                    <p style={{ fontSize: '11px', color: '#545d68', fontFamily: 'monospace', marginTop: '8px' }}>
-                      Loading document…
-                    </p>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center p-8 gap-4 bg-[var(--bg-surface)]">
+                     <div className="shimmer w-full max-w-3xl h-12 rounded-xl mb-4" />
+                     <div className="shimmer w-full max-w-3xl h-96 rounded-2xl opacity-70" />
+                     <div className="shimmer w-full max-w-3xl h-48 rounded-2xl opacity-40" />
                   </div>
                 )}
-
-                {/* Real iframe — invisible until loaded */}
                 <iframe
                   src={embedPdfUrl}
                   title={paperDetails.title}
@@ -227,108 +172,103 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
               </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4">
-                <FileText className="h-12 w-12 text-[#848d96] opacity-40" />
-                <p className="text-xs text-[#848d96]">Rendering document...</p>
+                <FileText className="h-16 w-16 text-[var(--text-muted)]" />
+                <p className="text-sm text-[var(--text-secondary)] font-medium">Rendering document...</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 max-w-4xl mx-auto w-full">
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 max-w-4xl mx-auto w-full">
             {/* Paper Header Card */}
-            <div className="glass-card rounded-xl p-6 space-y-4">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border badge-intermediate">
+            <div className="glass-card rounded-[24px] p-8 space-y-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-[rgba(10,132,255,0.15)] text-[var(--accent-blue-bright)]">
                 {currentDiff}
               </span>
-              <h1 className="text-lg font-extrabold text-[#f0f6fc]">{paperDetails.title}</h1>
-              <p className="text-xs text-[#848d96] flex items-center">
-                <User className="h-3.5 w-3.5 mr-1.5 text-[#58a6ff]" /> {authors}
+              <h1 className="text-2xl font-bold text-white">{paperDetails.title}</h1>
+              <p className="text-sm text-[var(--text-secondary)] flex items-center font-medium">
+                <User className="h-4 w-4 mr-2 text-[var(--accent-blue)]" /> {authors}
               </p>
-              <div className="bg-[#0d1117] p-4 rounded-lg border border-[#30363d] space-y-1">
-                <h4 className="text-xs font-bold text-[#58a6ff] uppercase tracking-wider">Abstract</h4>
-                <p className="text-xs text-[#c9d1d9] leading-relaxed">{paperDetails.abstract}</p>
+              <div className="bg-[var(--bg-base)] p-5 rounded-2xl border border-[var(--border-subtle)] space-y-2 mt-4">
+                <h4 className="text-xs font-bold text-[var(--accent-blue)] uppercase tracking-wider">Abstract</h4>
+                <p className="text-[14px] text-[var(--text-secondary)] leading-relaxed">{paperDetails.abstract}</p>
               </div>
             </div>
 
             {/* Detailed Content */}
-            <div className="space-y-4">
-              <h2 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider border-b border-[#30363d] pb-2 flex items-center">
-                <FileText className="h-4 w-4 mr-2 text-[#58a6ff]" /> Paper Content & Chunks
+            <div className="space-y-6">
+              <h2 className="text-sm font-bold text-white flex items-center border-b border-[var(--border-subtle)] pb-3">
+                <FileText className="h-5 w-5 mr-2 text-[var(--accent-blue)]" /> Document Content
               </h2>
 
               {isLoadingDetails ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '8px' }}>
+                <div className="space-y-4">
                   {[1, 0.85, 0.7].map((op, bi) => (
-                    <div key={bi} style={{
-                      background: '#161b22',
-                      border: '1px solid rgba(48,54,61,0.6)',
-                      borderRadius: '10px',
-                      padding: '16px',
-                      display: 'flex', flexDirection: 'column', gap: '8px',
-                      opacity: op,
-                    }}>
-                      <div className="shimmer" style={{ width: '30%', height: '10px', borderRadius: '3px' }} />
-                      {[100, 100, 92, 100, 84, 100, 76].map((w, i) => (
-                        <div key={i} className="shimmer" style={{ width: `${w}%`, height: '9px', borderRadius: '3px' }} />
-                      ))}
+                    <div key={bi} className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-2xl p-5 space-y-3" style={{opacity: op}}>
+                      <div className="shimmer w-1/3 h-3 rounded-md" />
+                      <div className="shimmer w-full h-2 rounded-sm" />
+                      <div className="shimmer w-11/12 h-2 rounded-sm" />
+                      <div className="shimmer w-full h-2 rounded-sm" />
                     </div>
                   ))}
                 </div>
               ) : paperDetails.content ? (
-                <div className="space-y-3 text-xs text-[#c9d1d9] leading-relaxed">
+                <div className="space-y-4 text-[14px] text-[var(--text-secondary)] leading-relaxed">
                   {paperDetails.content.split('\n\n').map((paragraph, index) => (
-                    <div key={index} className="bg-[#161b22] p-4 rounded-lg border border-[#30363d]">
+                    <div key={index} className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border-subtle)]">
                       {paragraph}
                     </div>
                   ))}
                 </div>
               ) : paperDetails.chunks && paperDetails.chunks.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {paperDetails.chunks.map((chunk, index) => (
-                    <div key={index} className="bg-[#161b22] p-4 rounded-lg border border-[#30363d]">
-                      <h4 className="text-[10px] font-mono text-[#58a6ff] uppercase mb-1">Chunk Section {index + 1}</h4>
-                      <p className="text-xs text-[#c9d1d9] leading-relaxed">{chunk.text}</p>
+                    <div key={index} className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border-subtle)]">
+                      <h4 className="text-[11px] font-bold text-[var(--accent-blue)] uppercase mb-2">Section {index + 1}</h4>
+                      <p className="text-[14px] text-[var(--text-secondary)] leading-relaxed">{chunk.text}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-[#161b22] p-4 rounded-lg border border-[#30363d] text-xs text-[#848d96]">
-                  Abstract loaded above. Switch to "PDF Reader" tab to view original document!
+                <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--border-subtle)] text-sm text-[var(--text-secondary)] text-center">
+                  Full text not available. Use the PDF reader to view the original document.
                 </div>
               )}
             </div>
-            <div className="h-12"></div>
+            <div className="h-16"></div>
           </div>
         )}
       </div>
 
-      {/* 🤖 RIGHT COLUMN: PAPERPATH AI TUTOR CHAT DRAWER */}
-      <div className="w-full md:w-96 lg:w-[420px] flex flex-col h-full bg-[#161b22] border-l border-[#30363d]/80 shrink-0">
+      {/* 🤖 RIGHT COLUMN: AI TUTOR CHAT (iMessage Style) */}
+      <div className="w-full md:w-[400px] flex flex-col h-full bg-[var(--bg-surface)] border-l border-[var(--border-subtle)] shrink-0 z-20 shadow-[-10px_0_30px_-15px_rgba(0,0,0,0.5)]">
         
         {/* AI Tutor Header */}
-        <div className="h-14 border-b border-[#30363d] bg-[#0d1117] flex items-center justify-between px-4 shrink-0 shadow-sm">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-1 rounded-lg bg-[#238636]/20 border border-[#238636]/40 glow-emerald">
-              <Bot className="h-4 w-4 text-[#3fb950]" />
+        <div className="h-[60px] border-b border-[var(--border-subtle)] bg-[var(--bg-overlay)] backdrop-blur-xl flex items-center justify-between px-5 shrink-0 z-10">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-full bg-[rgba(48,209,88,0.15)]">
+              <Bot className="h-5 w-5 text-[var(--accent-green)]" />
             </div>
             <div>
-              <h2 className="font-extrabold text-xs text-[#f0f6fc]">PaperPath AI Tutor</h2>
-              <p className="text-[10px] text-[#848d96]">Powered by Google Gemini API</p>
+              <h2 className="font-bold text-[15px] text-white tracking-tight">AI Tutor</h2>
+              <p className="text-[11px] text-[var(--text-secondary)] font-medium">Powered by Gemini</p>
             </div>
           </div>
-          <span className="text-[10px] font-mono text-[#3fb950] bg-[#238636]/20 px-2 py-0.5 rounded-full border border-[#238636]/40 flex items-center">
-            <span className="w-1.5 h-1.5 bg-[#3fb950] rounded-full mr-1 animate-pulse"></span> Active
-          </span>
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#0d1117]/50">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-[var(--bg-base)]">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {msg.role === 'ai' && (
+                <div className="w-6 h-6 rounded-full bg-[rgba(48,209,88,0.15)] flex items-center justify-center mr-2 shrink-0 mt-auto mb-1">
+                  <Bot className="h-3 w-3 text-[var(--accent-green)]" />
+                </div>
+              )}
               <div
-                className={`max-w-[92%] rounded-xl p-3.5 text-xs leading-relaxed ${
+                className={`max-w-[85%] rounded-[20px] px-4 py-2.5 text-[14px] leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-gradient-to-r from-[#238636] to-[#2ea043] text-white shadow-md'
-                    : 'bg-[#161b22] text-[#c9d1d9] border border-[#30363d] shadow-sm'
+                    ? 'bg-[var(--accent-blue)] text-white rounded-br-[4px]'
+                    : 'bg-[#262629] text-white rounded-bl-[4px] border border-[var(--border-subtle)]'
                 }`}
               >
                 {msg.role === 'user' ? (
@@ -342,10 +282,13 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
 
           {isTyping && (
             <div className="flex justify-start">
-              <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-3.5 flex items-center space-x-1.5">
-                <div className="w-1.5 h-1.5 bg-[#3fb950] rounded-full animate-bounce"></div>
-                <div className="w-1.5 h-1.5 bg-[#3fb950] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-1.5 h-1.5 bg-[#3fb950] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              <div className="w-6 h-6 rounded-full bg-[rgba(48,209,88,0.15)] flex items-center justify-center mr-2 shrink-0">
+                <Bot className="h-3 w-3 text-[var(--accent-green)]" />
+              </div>
+              <div className="bg-[#262629] border border-[var(--border-subtle)] rounded-[20px] rounded-bl-[4px] px-4 py-3 flex items-center space-x-1.5 h-[40px]">
+                <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-1.5 h-1.5 bg-[var(--text-secondary)] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
               </div>
             </div>
           )}
@@ -353,16 +296,18 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
         </div>
 
         {/* Input Bar & Prompts */}
-        <div className="p-4 bg-[#0d1117] border-t border-[#30363d] shrink-0 space-y-3">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="p-4 bg-[var(--bg-overlay)] backdrop-blur-xl border-t border-[var(--border-subtle)] shrink-0 z-10">
+          {/* Suggestion Chips */}
+          <div className="flex overflow-x-auto gap-2 mb-3 pb-1 scrollbar-hide">
             {quickPrompts.map((promptText, i) => (
               <button
                 key={i}
                 onClick={() => sendQuery(promptText)}
                 disabled={isTyping}
-                className="text-[10px] font-medium bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] border border-[#30363d] px-2.5 py-1 rounded-md transition-all hover:text-[#f0f6fc]"
+                className="whitespace-nowrap text-[12px] font-medium bg-[var(--bg-raised)] hover:bg-[#3a3a3c] text-[var(--text-secondary)] hover:text-white px-3 py-1.5 rounded-full transition-colors flex items-center"
               >
-                ⚡ {promptText}
+                <Sparkles className="h-3 w-3 mr-1.5 text-[var(--accent-blue)]" />
+                {promptText}
               </button>
             ))}
           </div>
@@ -372,15 +317,15 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Ask Copilot about this paper..."
-              className="w-full pl-3.5 pr-10 py-2.5 bg-[#161b22] border border-[#30363d] rounded-lg text-xs text-[#f0f6fc] placeholder-[#848d96] focus:border-[#58a6ff] outline-none transition-colors"
+              placeholder="Message AI Tutor..."
+              className="w-full pl-4 pr-12 py-3 bg-[var(--bg-raised)] border border-[var(--border-subtle)] rounded-full text-sm text-white placeholder-[var(--text-secondary)] focus:border-[var(--accent-blue)] outline-none transition-colors"
             />
             <button
               type="submit"
               disabled={!chatInput.trim() || isTyping}
-              className="absolute right-1.5 p-1.5 bg-[#238636] hover:bg-[#2ea043] text-white rounded-md disabled:opacity-40 transition-colors"
+              className="absolute right-1.5 p-2 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue-bright)] text-white rounded-full disabled:opacity-30 disabled:bg-[var(--bg-surface)] transition-all flex items-center justify-center"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4 w-4 ml-0.5" />
             </button>
           </form>
         </div>

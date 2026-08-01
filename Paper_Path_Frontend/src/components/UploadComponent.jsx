@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, Loader2, FileText, CheckCircle2, AlertCircle } from 'lucide-react'; 
+import { UploadCloud, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'; 
 
 const UploadComponent = ({ onUploadSuccess }) => {
     const [file, setFile] = useState(null);
@@ -51,38 +51,38 @@ const UploadComponent = ({ onUploadSuccess }) => {
     };
 
     return (
-        <div className="bg-[#0d1117] p-5 rounded-md border border-[#30363d] space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-[#f0f6fc] uppercase tracking-wider flex items-center gap-2">
-                    <UploadCloud className="w-4 h-4 text-[#3fb950]" />
+        <div className="bg-[var(--bg-overlay)] p-6 rounded-[24px] border border-[var(--border-subtle)] space-y-5 shadow-sm">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <h3 className="text-[13px] font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+                    <UploadCloud className="w-5 h-5 text-[var(--accent-green)]" />
                     Dataset Ingestion Pipeline
                 </h3>
                 <div className="flex items-center space-x-2">
-                    <span className="text-[10px] font-mono font-bold text-[#58a6ff] bg-[#58a6ff]/10 border border-[#58a6ff]/30 px-2 py-0.5 rounded">.PDF</span>
-                    <span className="text-[10px] font-mono font-bold text-[#3fb950] bg-[#238636]/10 border border-[#238636]/30 px-2 py-0.5 rounded">.CSV</span>
+                    <span className="text-[10px] font-bold text-[var(--accent-blue)] bg-[rgba(10,132,255,0.15)] px-2.5 py-1 rounded-full">.PDF</span>
+                    <span className="text-[10px] font-bold text-[var(--accent-green)] bg-[rgba(48,209,88,0.15)] px-2.5 py-1 rounded-full">.CSV</span>
                 </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
                 <input 
                     type="file" 
                     accept=".pdf,.csv"
                     onChange={handleFileChange}
-                    className="block w-full text-xs text-[#848d96]
-                        file:mr-4 file:py-2 file:px-3
-                        file:rounded-md file:border-0
-                        file:text-xs file:font-semibold
-                        file:bg-[#21262d] file:text-[#c9d1d9]
-                        hover:file:bg-[#30363d] cursor-pointer
-                        bg-[#161b22] border border-[#30363d] rounded-md p-1"
+                    className="block w-full text-[13px] font-medium text-[var(--text-secondary)]
+                        file:mr-4 file:py-2.5 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-[13px] file:font-bold
+                        file:bg-[var(--bg-raised)] file:text-[var(--text-primary)]
+                        hover:file:bg-[var(--bg-surface)] cursor-pointer
+                        bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl p-1.5 transition-colors"
                 />
                 <button 
                     onClick={handleUpload} 
                     disabled={!file || isUploading}
-                    className="bg-[#238636] hover:bg-[#2ea043] text-white px-4 py-2 rounded-md font-bold text-xs uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors shrink-0"
+                    className="bg-[var(--accent-green)] hover:bg-[#32d75f] text-white px-5 py-3 rounded-full font-bold text-[13px] tracking-wide disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all shadow-sm shrink-0"
                 >
                     {isUploading ? (
-                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Ingesting...</>
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Ingesting...</>
                     ) : (
                         'Ingest Dataset'
                     )}
@@ -90,15 +90,15 @@ const UploadComponent = ({ onUploadSuccess }) => {
             </div>
 
             {message && (
-                <div className={`p-3 rounded-md border text-xs font-medium flex items-center space-x-2 ${
+                <div className={`p-4 rounded-xl border text-[13px] font-bold flex items-center space-x-2.5 ${
                     message.startsWith('✅')
-                        ? 'bg-[#238636]/10 border-[#238636]/40 text-[#3fb950]'
-                        : 'bg-[#da3633]/10 border-[#da3633]/40 text-[#f85149]'
+                        ? 'bg-[rgba(48,209,88,0.15)] border-[rgba(48,209,88,0.3)] text-[var(--accent-green)]'
+                        : 'bg-[rgba(255,69,58,0.15)] border-[rgba(255,69,58,0.3)] text-[var(--accent-red)]'
                 }`}>
                     {message.startsWith('✅') ? (
-                        <CheckCircle2 className="h-4 w-4 text-[#3fb950] shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 shrink-0" />
                     ) : (
-                        <AlertCircle className="h-4 w-4 text-[#f85149] shrink-0" />
+                        <AlertCircle className="h-5 w-5 shrink-0" />
                     )}
                     <span>{message.replace(/^[✅❌]\s*/, '')}</span>
                 </div>

@@ -12,26 +12,22 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
   const [shake, setShake] = useState(false);
   const inputRefs = useRef([]);
 
-  // Auto-focus first box on mount
   useEffect(() => {
     inputRefs.current[0]?.focus();
   }, []);
 
-  // Resend cooldown ticker
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
     return () => clearInterval(t);
   }, [resendCooldown]);
 
-  // OTP expiry ticker
   useEffect(() => {
     if (expiryLeft <= 0) return;
     const t = setInterval(() => setExpiryLeft((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(t);
   }, []);
 
-  // Shake on error
   useEffect(() => {
     if (error) {
       setShake(true);
@@ -42,18 +38,15 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
   const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
   const handleChange = useCallback((index, value) => {
-    // Accept only a single digit
     const digit = value.replace(/\D/g, '').slice(-1);
     const next = [...digits];
     next[index] = digit;
     setDigits(next);
 
-    // Auto-advance
     if (digit && index < OTP_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all filled
     if (digit && index === OTP_LENGTH - 1) {
       const code = next.join('');
       if (code.length === OTP_LENGTH) onSuccess(code);
@@ -110,69 +103,34 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
   const filled = digits.filter(Boolean).length;
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px 16px',
-      background: '#0d1117',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '400px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-      }}>
+    <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-[var(--bg-base)]">
+      <div className="max-w-md w-full space-y-8">
         {/* Header */}
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '56px',
-            height: '56px',
-            background: 'rgba(88,166,255,0.1)',
-            border: '1px solid rgba(88,166,255,0.3)',
-            borderRadius: '50%',
-            marginBottom: '16px',
-          }}>
-            <ShieldCheck size={26} color="#58a6ff" />
+        <div className="text-center space-y-4">
+          <div className="mx-auto h-16 w-16 bg-[rgba(48,209,88,0.15)] border border-[rgba(48,209,88,0.3)] rounded-2xl flex items-center justify-center shadow-lg transform transition-transform hover:scale-105">
+            <ShieldCheck className="h-8 w-8 text-[var(--accent-green)]" />
           </div>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#f0f6fc', margin: '0 0 8px' }}>
-            Check your email
-          </h1>
-          <p style={{ fontSize: '13px', color: '#8b949e', margin: 0 }}>
-            We sent a 6-digit code to
-          </p>
-          <p style={{ fontSize: '13px', color: '#58a6ff', fontWeight: 600, margin: '4px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <Mail size={14} /> {email}
-          </p>
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight mb-2">Check your email</h1>
+            <p className="text-[14px] text-[var(--text-secondary)]">We sent a 6-digit code to</p>
+            <p className="text-[14px] font-semibold text-[var(--accent-blue)] mt-1 flex items-center justify-center gap-1.5">
+              <Mail size={16} /> {email}
+            </p>
+          </div>
         </div>
 
         {/* Card */}
-        <div style={{
-          background: '#161b22',
-          border: '1px solid #30363d',
-          borderRadius: '12px',
-          padding: '28px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px',
-        }}>
-
+        <div className="glass-card rounded-[32px] p-8 space-y-8">
           {/* Expiry timer */}
-          <div style={{ textAlign: 'center' }}>
+          <div className="text-center">
             {isExpired ? (
-              <span style={{ fontSize: '12px', color: '#f85149', fontWeight: 600 }}>
+              <span className="text-[13px] font-semibold text-[var(--accent-red)]">
                 ⚠ Code expired — please resend
               </span>
             ) : (
-              <span style={{ fontSize: '12px', color: '#8b949e' }}>
+              <span className="text-[13px] text-[var(--text-secondary)]">
                 Code expires in{' '}
-                <span style={{ color: expiryLeft < 60 ? '#e3b341' : '#3fb950', fontWeight: 700, fontFamily: 'monospace' }}>
+                <span className={`font-bold font-mono ${expiryLeft < 60 ? 'text-[var(--accent-orange)]' : 'text-[var(--accent-green)]'}`}>
                   {formatTime(expiryLeft)}
                 </span>
               </span>
@@ -180,13 +138,8 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
           </div>
 
           {/* OTP Input Boxes */}
-          <form onSubmit={handleSubmit}>
-            <div style={{
-              display: 'flex',
-              gap: '8px',
-              justifyContent: 'center',
-              animation: shake ? 'shake 0.5s cubic-bezier(.36,.07,.19,.97)' : 'none',
-            }}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className={`flex gap-2 justify-center ${shake ? 'animate-shake' : ''}`}>
               {digits.map((digit, i) => (
                 <input
                   key={i}
@@ -199,124 +152,62 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
                   onKeyDown={(e) => handleKeyDown(i, e)}
                   onPaste={i === 0 ? handlePaste : undefined}
                   disabled={isLoading || isExpired}
+                  className={`w-12 h-14 text-center text-2xl font-bold font-mono rounded-xl outline-none transition-all ${
+                    digit ? 'bg-[rgba(10,132,255,0.15)] text-white border-2 border-[var(--accent-blue)] shadow-[0_0_0_4px_rgba(10,132,255,0.15)]' : 'bg-[var(--bg-overlay)] text-white border border-[var(--border-subtle)]'
+                  } focus:border-[var(--accent-blue)] focus:bg-[rgba(10,132,255,0.1)]`}
                   style={{
-                    width: '44px',
-                    height: '52px',
-                    textAlign: 'center',
-                    fontSize: '22px',
-                    fontWeight: 700,
-                    fontFamily: 'monospace',
-                    background: digit ? 'rgba(88,166,255,0.08)' : '#0d1117',
-                    border: error
-                      ? '2px solid rgba(248,81,73,0.7)'
-                      : digit
-                      ? '2px solid rgba(88,166,255,0.6)'
-                      : '2px solid #30363d',
-                    borderRadius: '8px',
-                    color: '#f0f6fc',
-                    outline: 'none',
-                    transition: 'border-color 0.2s, background 0.2s',
-                    caretColor: '#58a6ff',
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#58a6ff';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(88,166,255,0.15)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = digit ? 'rgba(88,166,255,0.6)' : '#30363d';
-                    e.target.style.boxShadow = 'none';
+                    borderColor: error ? 'var(--accent-red)' : undefined
                   }}
                 />
               ))}
             </div>
 
-            {/* Error message */}
             {error && (
-              <p style={{
-                textAlign: 'center',
-                fontSize: '12px',
-                color: '#f85149',
-                margin: '12px 0 0',
-                padding: '8px 12px',
-                background: 'rgba(248,81,73,0.08)',
-                borderRadius: '6px',
-                border: '1px solid rgba(248,81,73,0.2)',
-              }}>
+              <p className="text-center text-[13px] text-[var(--accent-red)] mt-3 p-2 bg-[rgba(255,69,58,0.1)] border border-[rgba(255,69,58,0.3)] rounded-xl font-medium">
                 {error}
               </p>
             )}
 
-            {/* Submit button */}
             <button
               type="submit"
               disabled={isLoading || filled < OTP_LENGTH || isExpired}
-              style={{
-                marginTop: '20px',
-                width: '100%',
-                padding: '11px',
-                background: filled === OTP_LENGTH && !isExpired ? '#238636' : 'rgba(35,134,54,0.3)',
-                color: '#fff',
-                border: '1px solid rgba(240,246,252,0.1)',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 700,
-                letterSpacing: '0.04em',
-                cursor: filled === OTP_LENGTH && !isExpired && !isLoading ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                transition: 'background 0.2s',
-                opacity: isLoading ? 0.7 : 1,
-              }}
-              onMouseEnter={(e) => { if (filled === OTP_LENGTH && !isExpired) e.target.style.background = '#2ea043'; }}
-              onMouseLeave={(e) => { if (filled === OTP_LENGTH && !isExpired) e.target.style.background = '#238636'; }}
+              className={`w-full py-4 rounded-xl text-[15px] font-bold tracking-wide flex items-center justify-center gap-2 transition-all ${
+                filled === OTP_LENGTH && !isExpired && !isLoading
+                  ? 'bg-[var(--accent-green)] hover:bg-[#32d75f] text-white shadow-md'
+                  : 'bg-[rgba(48,209,88,0.2)] text-[var(--text-secondary)] cursor-not-allowed'
+              }`}
             >
-              {isLoading ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <ShieldCheck size={16} />}
+              {isLoading ? <Loader2 size={20} className="animate-spin" /> : <ShieldCheck size={20} />}
               {isLoading ? 'Verifying…' : 'Verify Code'}
             </button>
           </form>
 
           {/* Resend row */}
-          <div style={{ textAlign: 'center', borderTop: '1px solid #21262d', paddingTop: '16px' }}>
-            <p style={{ fontSize: '12px', color: '#8b949e', margin: '0 0 8px' }}>
-              Didn't receive the code?
-            </p>
+          <div className="text-center pt-6 border-t border-[var(--border-subtle)]">
+            <p className="text-[13px] text-[var(--text-secondary)] mb-2">Didn't receive the code?</p>
             <button
               onClick={handleResend}
               disabled={resendCooldown > 0 || isLoading}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: resendCooldown > 0 || isLoading ? 'not-allowed' : 'pointer',
-                color: resendCooldown > 0 ? '#545d68' : '#58a6ff',
-                fontSize: '13px',
-                fontWeight: 600,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                transition: 'color 0.2s',
-              }}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all ${
+                resendCooldown > 0 || isLoading
+                  ? 'text-[var(--text-muted)] cursor-not-allowed'
+                  : 'text-[var(--accent-blue)] hover:bg-[var(--bg-raised)] cursor-pointer'
+              }`}
             >
-              <RefreshCw size={13} />
+              <RefreshCw size={14} />
               {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
             </button>
           </div>
         </div>
 
-        {/* Back link */}
-        <p style={{ textAlign: 'center', fontSize: '12px', color: '#545d68' }}>
+        <p className="text-center text-[13px] text-[var(--text-secondary)]">
           Wrong email?{' '}
-          <a href="#" onClick={(e) => { e.preventDefault(); window.location.reload(); }}
-            style={{ color: '#8b949e', textDecoration: 'underline' }}>
+          <a href="#" onClick={(e) => { e.preventDefault(); window.location.reload(); }} className="text-[var(--text-primary)] hover:underline font-medium">
             Go back
           </a>
         </p>
       </div>
 
-      {/* Keyframe animations via style tag */}
       <style>{`
         @keyframes shake {
           10%, 90% { transform: translateX(-2px); }
@@ -324,7 +215,9 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
           30%, 50%, 70% { transform: translateX(-6px); }
           40%, 60% { transform: translateX(6px); }
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-shake {
+          animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
       `}</style>
     </div>
   );

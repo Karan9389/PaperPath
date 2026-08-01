@@ -21,6 +21,20 @@ export default function App() {
   const [pendingEmail, setPendingEmail] = useState('');   // email waiting for OTP
   const [otpError, setOtpError] = useState('');           // error from verifyOtp
   const { toasts, toast, removeToast } = useToast();
+  
+  // 🌓 Theme State
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
   // 🔄 Check stored session token on mount
   useEffect(() => {
@@ -214,8 +228,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d13] text-[#e6edf3] font-sans selection:bg-[#238636]/30 selection:text-[#3fb950]">
-      {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} currentView={view} />}
+    <div className="min-h-screen font-sans">
+      {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} currentView={view} theme={theme} toggleTheme={toggleTheme} />}
 
       <main className="max-w-7xl mx-auto">
         {(() => {
