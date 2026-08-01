@@ -6,6 +6,7 @@ import MarkdownMessage from './MarkdownMessage';
 export default function ReaderView({ paper, isSaved = false, onToggleSave, onBack }) {
   const [paperDetails, setPaperDetails] = useState(paper);
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false); // tracks PDF iframe load
   const [viewMode, setViewMode] = useState('pdf'); // 'pdf' | 'text'
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([
@@ -22,6 +23,7 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
   ];
 
   useEffect(() => {
+    setIframeLoaded(false); // reset skeleton each time paper changes
     const loadFullPaper = async () => {
       if (paper._id && (!paper.content && !paper.chunks?.length)) {
         setIsLoadingDetails(true);
@@ -156,11 +158,73 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
         {viewMode === 'pdf' ? (
           <div className="flex-1 bg-[#161b22] relative overflow-hidden">
             {embedPdfUrl ? (
-              <iframe
-                src={embedPdfUrl}
-                title={paperDetails.title}
-                className="w-full h-full border-none"
-              />
+              <>
+                {/* ── PDF Skeleton — visible until iframe fires onLoad ── */}
+                {!iframeLoaded && (
+                  <div style={{
+                    position: 'absolute', inset: 0, zIndex: 10,
+                    background: '#161b22',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', padding: '32px 24px', gap: '16px',
+                    overflowY: 'hidden',
+                  }}>
+                    {/* Fake toolbar */}
+                    <div style={{ width: '100%', maxWidth: '720px', display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+                      <div className="shimmer" style={{ width: '36px', height: '36px', borderRadius: '8px', flexShrink: 0 }} />
+                      <div className="shimmer" style={{ flex: 1, height: '28px', borderRadius: '6px' }} />
+                      <div className="shimmer" style={{ width: '60px', height: '28px', borderRadius: '6px', flexShrink: 0 }} />
+                    </div>
+
+                    {/* Fake PDF pages */}
+                    {[1, 0.92, 0.88].map((opacity, pi) => (
+                      <div key={pi} style={{
+                        width: '100%', maxWidth: '680px',
+                        background: 'rgba(22,27,34,0.9)',
+                        border: '1px solid rgba(48,54,61,0.5)',
+                        borderRadius: '8px',
+                        padding: '28px 32px',
+                        display: 'flex', flexDirection: 'column', gap: '10px',
+                        opacity,
+                      }}>
+                        {/* Page header */}
+                        <div className="shimmer" style={{ width: '55%', height: '18px', borderRadius: '4px' }} />
+                        <div className="shimmer" style={{ width: '35%', height: '11px', borderRadius: '4px' }} />
+                        <div style={{ height: '1px', background: 'rgba(48,54,61,0.6)', margin: '4px 0' }} />
+                        {/* Paragraph lines */}
+                        {[100,100,94,100,87,100,76].map((w, i) => (
+                          <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
+                        ))}
+                        <div style={{ height: '8px' }} />
+                        {[100,100,91,100,83].map((w, i) => (
+                          <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
+                        ))}
+                        {pi === 0 && (
+                          <>
+                            <div style={{ height: '8px' }} />
+                            {[100,96,100,78].map((w, i) => (
+                              <div key={i} className="shimmer" style={{ width: `${w}%`, height: '10px', borderRadius: '3px' }} />
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Loading label */}
+                    <p style={{ fontSize: '11px', color: '#545d68', fontFamily: 'monospace', marginTop: '8px' }}>
+                      Loading document…
+                    </p>
+                  </div>
+                )}
+
+                {/* Real iframe — invisible until loaded */}
+                <iframe
+                  src={embedPdfUrl}
+                  title={paperDetails.title}
+                  className="w-full h-full border-none"
+                  style={{ opacity: iframeLoaded ? 1 : 0, transition: 'opacity 0.4s ease' }}
+                  onLoad={() => setIframeLoaded(true)}
+                />
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-4">
                 <FileText className="h-12 w-12 text-[#848d96] opacity-40" />
@@ -192,8 +256,22 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
               </h2>
 
               {isLoadingDetails ? (
-                <div className="py-8 text-center text-[#848d96] text-xs font-mono animate-pulse">
-                  Loading full text body...
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '8px' }}>
+                  {[1, 0.85, 0.7].map((op, bi) => (
+                    <div key={bi} style={{
+                      background: '#161b22',
+                      border: '1px solid rgba(48,54,61,0.6)',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      display: 'flex', flexDirection: 'column', gap: '8px',
+                      opacity: op,
+                    }}>
+                      <div className="shimmer" style={{ width: '30%', height: '10px', borderRadius: '3px' }} />
+                      {[100, 100, 92, 100, 84, 100, 76].map((w, i) => (
+                        <div key={i} className="shimmer" style={{ width: `${w}%`, height: '9px', borderRadius: '3px' }} />
+                      ))}
+                    </div>
+                  ))}
                 </div>
               ) : paperDetails.content ? (
                 <div className="space-y-3 text-xs text-[#c9d1d9] leading-relaxed">
