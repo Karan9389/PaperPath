@@ -1,111 +1,143 @@
 import React from 'react';
 import { Bookmark, ExternalLink, User, Tag, BookOpen, GraduationCap } from 'lucide-react';
 
-const CATEGORY_COLORS = {
-  'Natural Language Processing': { text: 'var(--accent-blue)', bg: 'rgba(10, 132, 255, 0.15)' },
-  'Computer Vision':             { text: 'var(--accent-green)', bg: 'rgba(48, 209, 88, 0.15)' },
-  'Generative AI':               { text: 'var(--accent-purple)', bg: 'rgba(191, 90, 242, 0.15)' },
-  'Multimodal AI':               { text: 'var(--accent-orange)', bg: 'rgba(255, 159, 10, 0.15)' },
-  'Reinforcement Learning':      { text: 'var(--accent-red)', bg: 'rgba(255, 69, 58, 0.15)' },
-  'Deep Learning':               { text: 'var(--accent-blue-bright)', bg: 'rgba(100, 210, 255, 0.15)' },
-  'Large Language Models':       { text: 'var(--accent-purple)', bg: 'rgba(191, 90, 242, 0.15)' },
-  'Artificial Intelligence':     { text: 'var(--accent-green)', bg: 'rgba(48, 209, 88, 0.15)' },
-  'AI Alignment':                { text: 'var(--accent-orange)', bg: 'rgba(255, 159, 10, 0.15)' },
-  'Computational Biology':       { text: 'var(--accent-green)', bg: 'rgba(48, 209, 88, 0.15)' },
-  'Graph Machine Learning':      { text: 'var(--accent-blue)', bg: 'rgba(10, 132, 255, 0.15)' },
+// Theme-aware accent pairs: text uses CSS var, bg is a safe rgba tint
+const CATEGORY_MAP = {
+  'Natural Language Processing': { varName: '--accent-blue',   bg: 'rgba(64,156,255,0.13)' },
+  'Computer Vision':             { varName: '--accent-green',  bg: 'rgba(48,209,88,0.13)'  },
+  'Generative AI':               { varName: '--accent-purple', bg: 'rgba(191,90,242,0.13)' },
+  'Multimodal AI':               { varName: '--accent-orange', bg: 'rgba(255,159,10,0.13)' },
+  'Reinforcement Learning':      { varName: '--accent-red',    bg: 'rgba(255,69,58,0.13)'  },
+  'Deep Learning':               { varName: '--accent-blue-bright', bg: 'rgba(14,165,233,0.13)' },
+  'Large Language Models':       { varName: '--accent-purple', bg: 'rgba(191,90,242,0.13)' },
+  'Artificial Intelligence':     { varName: '--accent-green',  bg: 'rgba(48,209,88,0.13)'  },
+  'AI Alignment':                { varName: '--accent-orange', bg: 'rgba(255,159,10,0.13)' },
+  'Computational Biology':       { varName: '--accent-green',  bg: 'rgba(48,209,88,0.13)'  },
+  'Graph Machine Learning':      { varName: '--accent-blue',   bg: 'rgba(64,156,255,0.13)' },
 };
-
-const DEFAULT_COLOR = { text: 'var(--text-secondary)', bg: 'rgba(235, 235, 245, 0.1)' };
+const DEFAULT_MAP = { varName: '--text-secondary', bg: 'var(--bg-overlay)' };
 
 export default function PaperCard({ paper, isSaved, onOpen, onToggleSave }) {
   const level = (paper.difficultyLevel || paper.difficulty || 'beginner').toLowerCase();
   const formattedLevel = level.charAt(0).toUpperCase() + level.slice(1);
-  const catColor = CATEGORY_COLORS[paper.category] || DEFAULT_COLOR;
+  const cat = CATEGORY_MAP[paper.category] || DEFAULT_MAP;
+  const catTextColor = `var(${cat.varName})`;
 
-  const diffBadgeClass = {
-    beginner:     'badge-beginner',
-    intermediate: 'badge-intermediate',
-    advanced:     'badge-advanced',
-  };
+  const diffBadgeClass = { beginner: 'badge-beginner', intermediate: 'badge-intermediate', advanced: 'badge-advanced' };
 
   return (
     <div
       onClick={onOpen}
-      className="group glass-card rounded-[24px] cursor-pointer flex flex-col overflow-hidden relative transition-all"
+      className="group glass-card rounded-[22px] cursor-pointer flex flex-col overflow-hidden"
     >
-      <div className="p-6 flex-grow flex flex-col space-y-4">
-        {/* Header: Badges + Bookmark */}
+      {/* ── Subtle top color accent line ── */}
+      <div
+        className="h-[2px] w-full shrink-0 rounded-t-[22px]"
+        style={{
+          background: `linear-gradient(90deg, ${catTextColor} 0%, transparent 100%)`,
+          opacity: 0.5,
+        }}
+      />
+
+      <div className="p-5 flex-grow flex flex-col gap-3.5">
+
+        {/* Header: badges + bookmark */}
         <div className="flex justify-between items-start gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Difficulty badge */}
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${diffBadgeClass[level] || diffBadgeClass.beginner}`}>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span
+              className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-full ${diffBadgeClass[level] || diffBadgeClass.beginner}`}
+            >
               {formattedLevel}
             </span>
 
-            {/* Category badge */}
             {paper.category && (
               <span
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
-                style={{ background: catColor.bg, color: catColor.text }}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5"
+                style={{ background: cat.bg, color: catTextColor }}
               >
-                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: catColor.text }} />
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: catTextColor }} />
                 {paper.category}
               </span>
             )}
           </div>
 
-          {/* Bookmark button */}
           <button
             onClick={(e) => { e.stopPropagation(); onToggleSave(paper); }}
-            className={`shrink-0 p-2 rounded-full transition-all duration-200 ${
+            className="shrink-0 p-2 rounded-full transition-all duration-200"
+            style={
               isSaved
-                ? 'bg-[var(--accent-purple)] text-white shadow-md'
-                : 'bg-[var(--bg-overlay)] text-[var(--text-secondary)] hover:bg-[var(--bg-raised)] hover:text-white border border-[var(--border-subtle)]'
-            }`}
+                ? { background: 'var(--accent-purple)', color: '#fff', boxShadow: '0 4px 12px rgba(191,90,242,0.40)' }
+                : { background: 'var(--bg-overlay)', color: 'var(--text-muted)', border: '1px solid var(--border-subtle)' }
+            }
             title={isSaved ? 'Remove bookmark' : 'Save paper'}
           >
-            <Bookmark className="h-4 w-4" fill={isSaved ? 'currentColor' : 'none'} />
+            <Bookmark className="h-3.5 w-3.5" fill={isSaved ? 'currentColor' : 'none'} />
           </button>
         </div>
 
-        {/* Paper Title */}
-        <h3 className="text-[17px] font-bold text-white leading-snug group-hover:text-[var(--accent-blue)] transition-colors duration-200">
+        {/* Title */}
+        <h3
+          className="text-[16px] font-bold leading-snug transition-colors duration-200 group-hover:opacity-80"
+          style={{ color: 'var(--text-on-card)' }}
+        >
           {paper.title}
         </h3>
 
-        {/* Author line */}
-        <p className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 font-medium">
-          <User className="h-3.5 w-3.5 shrink-0" style={{ color: catColor.text }} />
+        {/* Author */}
+        <p
+          className="text-[12px] flex items-center gap-1.5 font-semibold"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          <User className="h-3.5 w-3.5 shrink-0" style={{ color: catTextColor }} />
           <span className="truncate">
-            {(!paper.authors || paper.authors === 'Unknown Author') ? 'Academic Research Consortium' : paper.authors}
+            {(!paper.authors || paper.authors === 'Unknown Author')
+              ? 'Academic Research Consortium'
+              : paper.authors}
           </span>
         </p>
 
-        {/* Abstract snippet */}
-        <p className="text-[13px] text-[var(--text-secondary)] line-clamp-3 leading-relaxed">
+        {/* Abstract */}
+        <p
+          className="text-[13px] line-clamp-3 leading-relaxed"
+          style={{ color: 'var(--text-secondary)' }}
+        >
           {paper.abstract}
         </p>
 
         {/* Tags */}
         {(paper.tags || []).length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
+          <div className="flex flex-wrap gap-1.5 pt-0.5">
             {paper.tags.slice(0, 4).map((tag, i) => (
               <span
                 key={i}
-                className="text-[11px] font-medium bg-[var(--bg-overlay)] text-[var(--text-secondary)] px-2.5 py-1 rounded-md flex items-center gap-1 transition-colors"
+                className="text-[11px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1"
+                style={{
+                  background: 'var(--bg-overlay)',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border-subtle)',
+                }}
               >
-                <Tag className="h-2.5 w-2.5 opacity-60" />{tag}
+                <Tag className="h-2.5 w-2.5 opacity-50" />{tag}
               </span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-6 py-4 bg-[var(--bg-overlay)] border-t border-[var(--border-subtle)] flex items-center justify-between">
-        <span className="text-xs font-semibold text-[var(--text-secondary)] flex items-center gap-1.5 group-hover:text-white transition-colors">
-          <BookOpen className="h-4 w-4" style={{ color: catColor.text }} />
-          Inspect & Ask AI
+      {/* ── Footer ── */}
+      <div
+        className="px-5 py-3.5 flex items-center justify-between gap-3 transition-colors duration-200"
+        style={{
+          background: 'var(--bg-overlay)',
+          borderTop: '1px solid var(--border-subtle)',
+        }}
+      >
+        <span
+          className="text-[11px] font-semibold flex items-center gap-1.5 transition-colors duration-200 group-hover:opacity-100"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          <BookOpen className="h-3.5 w-3.5 shrink-0" style={{ color: catTextColor }} />
+          Inspect &amp; Ask AI
         </span>
 
         <div className="flex items-center gap-2">
@@ -115,11 +147,8 @@ export default function PaperCard({ paper, isSaved, onOpen, onToggleSave }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all hover:brightness-110"
-              style={{
-                color: catColor.text,
-                background: catColor.bg,
-              }}
+              className="text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 transition-all hover:opacity-80"
+              style={{ color: catTextColor, background: cat.bg }}
               title="View PDF"
             >
               <ExternalLink className="h-3 w-3" /> PDF
@@ -130,7 +159,8 @@ export default function PaperCard({ paper, isSaved, onOpen, onToggleSave }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-xs font-bold text-black bg-[var(--text-primary)] hover:bg-[#e0e0e0] px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all"
+            className="text-[11px] font-bold px-3 py-1 rounded-full flex items-center gap-1 transition-all hover:opacity-80"
+            style={{ background: 'var(--scholar-bg)', color: 'var(--scholar-text)' }}
             title="Google Scholar"
           >
             <GraduationCap className="h-3 w-3" /> Scholar

@@ -228,10 +228,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen font-sans">
+    <div className="min-h-screen font-sans relative">
       {user && view !== 'login' && <Navbar user={user} onLogout={handleLogout} setView={setView} currentView={view} theme={theme} toggleTheme={toggleTheme} />}
 
-      <main className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto relative z-10">
         {(() => {
           switch (view) {
             case 'login':

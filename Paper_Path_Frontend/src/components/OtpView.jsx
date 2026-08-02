@@ -111,7 +111,7 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
             <ShieldCheck className="h-8 w-8 text-[var(--accent-green)]" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight mb-2">Check your email</h1>
+            <h1 className="text-2xl font-bold tracking-tight mb-2" style={{ color: 'var(--text-primary)' }}>Check your email</h1>
             <p className="text-[14px] text-[var(--text-secondary)]">We sent a 6-digit code to</p>
             <p className="text-[14px] font-semibold text-[var(--accent-blue)] mt-1 flex items-center justify-center gap-1.5">
               <Mail size={16} /> {email}

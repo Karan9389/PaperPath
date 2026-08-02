@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Bookmark, Cpu, History, Library, Search, Sparkles, ChevronRight, Layers, LayoutGrid
+  Bookmark, Cpu, History, Library, Search, Sparkles, ChevronDown, Layers, LayoutGrid
 } from 'lucide-react';
 import PaperCard from './PaperCard';
 
@@ -87,97 +87,163 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
     );
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+  const TABS = [
+    { key: 'all',     label: 'Feed',    icon: <LayoutGrid className="h-3.5 w-3.5" />, count: papers.length },
+    { key: 'saved',   label: 'Saved',   icon: <Bookmark className="h-3.5 w-3.5" />,  count: savedPapers.length },
+    { key: 'history', label: 'History', icon: <History className="h-3.5 w-3.5" />,   count: readHistory.length },
+  ];
 
-      {/* Spotlight-style Search Bar & Header container */}
-      <div className="glass-card rounded-[32px] p-6 sm:p-8 shadow-lg relative overflow-hidden flex flex-col gap-6">
-        {/* Subtle background glow effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-full bg-gradient-to-b from-[rgba(10,132,255,0.05)] to-transparent pointer-events-none" />
-        
-        {/* Header Row: Title & AI Stats Inline */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
-          <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-[var(--accent-blue)]" />
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
+
+      {/* ── Hero Search Card ── */}
+      <div
+        className="glass-card rounded-[28px] p-6 sm:p-8 relative overflow-hidden flex flex-col gap-5"
+        style={{ cursor: 'default' }}
+      >
+        {/* Decorative glow blobs */}
+        <div
+          className="absolute -top-12 -left-12 w-64 h-64 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(64,156,255,0.12) 0%, transparent 70%)',
+            filter: 'blur(24px)',
+          }}
+        />
+        <div
+          className="absolute -bottom-16 -right-8 w-56 h-56 rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(191,90,242,0.10) 0%, transparent 70%)',
+            filter: 'blur(24px)',
+          }}
+        />
+
+        {/* Header row */}
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h2
+            className="text-xl sm:text-2xl font-extrabold flex items-center gap-2.5 tracking-tight"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            <Sparkles className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--accent-blue)' }} />
             Research Explorer
           </h2>
-          
-          {/* Inline AI Engine Stats replacing the sidebar */}
-          <div className="flex items-center gap-4 bg-[var(--bg-overlay)] px-4 py-2 rounded-full border border-[var(--border-subtle)] shadow-sm">
-             <div className="flex items-center gap-1.5 border-r border-[var(--border-subtle)] pr-4">
-               <Cpu className="h-4 w-4 text-[var(--accent-green)]" />
-               <span className="text-[12px] font-bold text-[var(--accent-green)]">Gemini Active</span>
-             </div>
-             <div className="flex items-center gap-2 pr-2">
-                <span className="text-[12px] font-medium text-[var(--text-secondary)]">Indexed:</span>
-                <span className="text-[12px] font-bold text-[var(--text-primary)]">{papers.length} Papers</span>
-             </div>
+
+          {/* Status row */}
+          <div
+            className="flex items-center gap-3 px-4 py-2 rounded-full self-start sm:self-auto"
+            style={{
+              background: 'var(--bg-overlay)',
+              border: '1px solid var(--border-subtle)',
+            }}
+          >
+            <div className="flex items-center gap-1.5 border-r pr-3" style={{ borderColor: 'var(--border-subtle)' }}>
+              <Cpu className="h-3.5 w-3.5" style={{ color: 'var(--accent-green)' }} />
+              <span className="text-[11px] font-bold" style={{ color: 'var(--accent-green)' }}>Gemini Active</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>Indexed:</span>
+              <span className="text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>{papers.length} Papers</span>
+            </div>
           </div>
         </div>
 
-        {/* The Search Input */}
-        <div className="relative z-10">
-          <div className="flex items-center bg-[var(--bg-overlay)] border border-[var(--border-subtle)] focus-within:border-[var(--accent-blue)] focus-within:bg-[var(--bg-surface)] rounded-2xl px-5 py-4 transition-all shadow-inner">
-            <Search className="h-5 w-5 text-[var(--text-secondary)] shrink-0 mr-3" />
+        {/* Search input */}
+        <div className="relative">
+          <div
+            className="flex items-center rounded-2xl px-5 py-3.5 transition-all duration-200"
+            style={{
+              background: 'var(--bg-overlay)',
+              border: '1px solid var(--border-subtle)',
+            }}
+            onFocusCapture={e => {
+              e.currentTarget.style.borderColor = 'var(--accent-blue)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(64,156,255,0.16)';
+            }}
+            onBlurCapture={e => {
+              e.currentTarget.style.borderColor = 'var(--border-subtle)';
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+          >
+            <Search className="h-4 w-4 shrink-0 mr-3" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by title, author, topic, or tag..."
-              className="w-full bg-transparent text-[16px] font-medium text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none"
+              placeholder="Search by title, author, topic, or tag…"
+              className="w-full bg-transparent text-[15px] font-medium outline-none"
+              style={{ color: 'var(--text-primary)' }}
             />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="p-1 rounded-full hover:bg-[var(--bg-raised)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">✕</button>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="ml-2 p-1 rounded-full transition-all duration-150"
+                style={{ color: 'var(--text-muted)', background: 'var(--bg-raised)' }}
+              >
+                ✕
+              </button>
             )}
           </div>
         </div>
 
-        {/* Categories Horizontal Pill List (Replaces left sidebar categories) */}
+        {/* Category pills */}
         {categories.length > 0 && (
-          <div className="relative z-10 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <div className="flex items-center gap-1.5 shrink-0 px-2 text-[var(--text-secondary)]">
-              <Layers className="h-4 w-4" />
-              <span className="text-xs font-bold uppercase tracking-wider">Topics:</span>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex items-center gap-1 shrink-0 mr-1" style={{ color: 'var(--text-muted)' }}>
+              <Layers className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Topics</span>
             </div>
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setSearchQuery(cat)}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] hover:bg-[var(--bg-raised)] hover:border-[var(--border-muted)] transition-all"
+                onClick={() => setSearchQuery(cat === searchQuery ? '' : cat)}
+                className="shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200"
+                style={{
+                  background: searchQuery === cat ? 'var(--accent-blue)' : 'var(--bg-overlay)',
+                  color: searchQuery === cat ? '#fff' : 'var(--text-primary)',
+                  border: `1px solid ${searchQuery === cat ? 'transparent' : 'var(--border-subtle)'}`,
+                }}
               >
-                <span className="text-xs">{CATEGORY_ICONS[cat] || '📄'}</span>
-                <span className="text-[13px] font-semibold text-[var(--text-primary)]">{cat}</span>
+                <span className="text-[11px]">{CATEGORY_ICONS[cat] || '📄'}</span>
+                {cat}
               </button>
             ))}
           </div>
         )}
 
-        {/* Filters and Tabs Row */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[var(--border-subtle)]">
-          {/* iOS Segmented Control Style Tabs */}
-          <div className="flex items-center p-1 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-sm">
-            {[
-              { key: 'all',     label: `Feed`, icon: <LayoutGrid className="h-4 w-4" />, count: papers.length },
-              { key: 'saved',   label: `Saved`, icon: <Bookmark className="h-4 w-4" />, count: savedPapers.length },
-              { key: 'history', label: `History`, icon: <History className="h-4 w-4" />, count: readHistory.length },
-            ].map(tab => (
+        {/* Filters row */}
+        <div
+          className="flex flex-wrap items-center justify-between gap-4 pt-4"
+          style={{ borderTop: '1px solid var(--border-subtle)' }}
+        >
+          {/* Feed tabs */}
+          <div
+            className="flex items-center p-1 rounded-full seg-ctrl"
+            style={{ gap: '2px' }}
+          >
+            {TABS.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setFeedTab(tab.key)}
-                className={`flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-bold transition-all duration-300 ${
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[12px] font-bold transition-all duration-200"
+                style={
                   feedTab === tab.key
-                    ? 'bg-[#3a3a3c] text-white shadow-md'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
+                    ? {
+                        background: 'var(--tab-active-bg)',
+                        color: 'var(--tab-active-text)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                      }
+                    : { color: 'var(--text-secondary)' }
+                }
               >
                 {tab.icon}
                 {tab.label}
                 {tab.count > 0 && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                    feedTab === tab.key
-                      ? 'bg-[var(--bg-base)] text-[var(--text-secondary)]'
-                      : 'bg-[var(--bg-raised)] text-[var(--text-muted)]'
-                  }`}>
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full font-bold"
+                    style={{
+                      background: feedTab === tab.key ? 'var(--bg-surface)' : 'var(--bg-raised)',
+                      color: 'var(--text-muted)',
+                    }}
+                  >
                     {tab.count}
                   </span>
                 )}
@@ -185,30 +251,34 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
             ))}
           </div>
 
-          <div className="flex items-center gap-4 ml-auto">
+          {/* Difficulty + count */}
+          <div className="flex items-center gap-3 ml-auto">
             <div className="relative">
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="appearance-none bg-[var(--bg-overlay)] border border-[var(--border-subtle)] rounded-full text-[13px] font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] pl-5 pr-9 py-2.5 outline-none cursor-pointer hover:border-[var(--border-muted)] focus:border-[var(--accent-blue)] transition-all shadow-sm"
+                className="select-glass appearance-none rounded-full text-[12px] font-bold pl-4 pr-8 py-2 outline-none cursor-pointer transition-all"
               >
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
                 <option value="intermediate">Intermediate</option>
                 <option value="advanced">Advanced</option>
               </select>
-              <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)] pointer-events-none rotate-90" />
+              <ChevronDown
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 pointer-events-none"
+                style={{ color: 'var(--text-secondary)' }}
+              />
             </div>
-            <span className="text-[13px] text-[var(--text-muted)] font-bold shrink-0">
+            <span className="text-[12px] font-bold shrink-0" style={{ color: 'var(--text-muted)' }}>
               {displayedPapers.length} result{displayedPapers.length !== 1 ? 's' : ''}
             </span>
           </div>
         </div>
       </div>
 
-      {/* FULL WIDTH Paper Cards (Masonry Layout) */}
+      {/* ── Paper Grid ── */}
       {displayedPapers.length > 0 ? (
-        <div className="columns-1 md:columns-2 xl:columns-3 gap-6 space-y-6 pb-10">
+        <div className="columns-1 md:columns-2 xl:columns-3 gap-5 space-y-5 pb-12">
           {displayedPapers.map((paper) => (
             <div key={paper._id} className="break-inside-avoid">
               <PaperCard
@@ -221,13 +291,25 @@ export default function DashboardView({ papers, savedPapers, readHistory, isLoad
           ))}
         </div>
       ) : (
-        <div className="glass-card rounded-[32px] p-16 text-center flex flex-col items-center justify-center shadow-sm max-w-2xl mx-auto mt-8">
-          <div className="h-20 w-20 rounded-full bg-[var(--bg-overlay)] border border-[var(--border-subtle)] flex items-center justify-center mb-5">
-            <Library className="h-10 w-10 text-[var(--text-muted)]" />
+        <div
+          className="glass-card rounded-[28px] p-16 text-center flex flex-col items-center justify-center max-w-xl mx-auto mt-6"
+        >
+          <div
+            className="h-20 w-20 rounded-full flex items-center justify-center mb-5"
+            style={{
+              background: 'var(--bg-overlay)',
+              border: '1px solid var(--border-subtle)',
+            }}
+          >
+            <Library className="h-10 w-10" style={{ color: 'var(--text-muted)' }} />
           </div>
-          <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">Nothing found</h3>
-          <p className="text-[15px] font-medium text-[var(--text-secondary)]">
-            {feedTab === 'saved' ? 'No bookmarked papers yet.' : feedTab === 'history' ? 'No reading history yet.' : 'Try adjusting your search query or selecting a different category.'}
+          <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-on-card)' }}>Nothing found</h3>
+          <p className="text-[14px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            {feedTab === 'saved'
+              ? 'No bookmarked papers yet.'
+              : feedTab === 'history'
+              ? 'No reading history yet.'
+              : 'Try adjusting your search or selecting a different category.'}
           </p>
         </div>
       )}
