@@ -71,6 +71,11 @@ function ToastItem({ id, type = 'info', message, duration = 4000, onRemove }) {
     return () => cancelAnimationFrame(t);
   }, []);
 
+  const dismiss = useCallback(() => {
+    setVisible(false);
+    setTimeout(() => onRemove(id), 350);
+  }, [id, onRemove]);
+
   // Progress bar countdown
   useEffect(() => {
     const step = 100 / (duration / 50);
@@ -85,12 +90,7 @@ function ToastItem({ id, type = 'info', message, duration = 4000, onRemove }) {
       });
     }, 50);
     return () => clearInterval(intervalRef.current);
-  }, []);
-
-  const dismiss = useCallback(() => {
-    setVisible(false);
-    setTimeout(() => onRemove(id), 350);
-  }, [id, onRemove]);
+  }, [dismiss, duration]);
 
   return (
     <div
