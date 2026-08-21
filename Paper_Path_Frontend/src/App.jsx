@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import LoginView from './components/LoginView';
 import OtpView from './components/OtpView';
 import DashboardView from './components/DashboardView';
 import ReaderView from './components/ReaderView';
 import ProfileView from './components/ProfileView';
-import { authService, libraryService, paperService } from './services/api';
+import { authService, libraryService, paperService, setUnauthorizedCallback } from './services/api';
 import { ToastContainer, useToast } from './components/Toast';
 
 export default function App() {
@@ -15,7 +15,7 @@ export default function App() {
   const [savedPapers, setSavedPapers] = useState([]);
   const [readHistory, setReadHistory] = useState([]);
   const [currentPaper, setCurrentPaper] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // true by default so skeleton shows immediately
+  const [isLoading, setIsLoading] = useState(false);
   const [authMode, setAuthMode] = useState('login');
   const [authError, setAuthError] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');   // email waiting for OTP
@@ -36,21 +36,24 @@ export default function App() {
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark');
 
-  // 🔄 Check stored session token on mount
+
+
+  // 🔒 Register global 401 handler — resets to login without a page reload
   useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const storedProfile = await authService.getProfile();
-        if (storedProfile && storedProfile._id) {
-          setUser(storedProfile);
-          setView('dashboard');
-        }
-      } catch (err) {
-        // Token invalid or expired
-      }
-    };
-    restoreSession();
-  }, []);
+    setUnauthorizedCallback(() => {
+      authService.logout();
+      setUser(null);
+      setCurrentPaper(null);
+      setPapers([]);
+      setSavedPapers([]);
+      setReadHistory([]);
+      setAuthError('');
+      setAuthMode('login');
+      setView('login');
+      toast.info('Your session expired. Please log in again.');
+    });
+    return () => setUnauthorizedCallback(null);
+  }, [toast]);
 
   const handleLogin = async (e, email, password) => {
     e.preventDefault();
@@ -147,7 +150,7 @@ export default function App() {
     toast.info('You have been logged out. See you soon! 👋');
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
 
     try {
@@ -172,13 +175,13 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if ((view === 'dashboard' || view === 'profile') && papers.length === 0) {
       fetchDashboardData();
     }
-  }, [view]);
+  }, [view, papers.length, fetchDashboardData]);
 
   const openPaper = async (paper) => {
     setCurrentPaper(paper);
