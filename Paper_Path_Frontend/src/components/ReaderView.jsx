@@ -24,6 +24,7 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
 
   useEffect(() => {
     setIframeLoaded(false);
+    setPaperDetails(paper);
     const loadFullPaper = async () => {
       if (paper._id && (!paper.content && !paper.chunks?.length)) {
         setIsLoadingDetails(true);
@@ -40,7 +41,7 @@ export default function ReaderView({ paper, isSaved = false, onToggleSave, onBac
       }
     };
     loadFullPaper();
-  }, [paper._id]);
+  }, [paper]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
