@@ -22,6 +22,11 @@ const persistToken = (result) => {
   }
 };
 
+// Module-level callback registered by App.jsx to handle session expiry gracefully
+// without a page reload (which causes flickering).
+let _onUnauthorized = null;
+export const setUnauthorizedCallback = (fn) => { _onUnauthorized = fn; };
+
 // 🌐 Pure, unmocked fetch request to your real backend
 async function request(endpoint, { method = 'GET', body } = {}) {
   const token = getStoredToken();
@@ -35,6 +40,14 @@ async function request(endpoint, { method = 'GET', body } = {}) {
   });
 
   const payload = await response.json().catch(() => ({}));
+
+  if (response.status === 401) {
+    // Clear the stale token from storage
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    // Notify the React app to reset to the login screen
+    if (_onUnauthorized) _onUnauthorized();
+    throw new Error(payload.message || 'Session expired. Please log in again.');
+  }
 
   if (!response.ok) {
     throw new Error(payload.message || 'Request failed');
