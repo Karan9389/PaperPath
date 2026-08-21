@@ -39,38 +39,38 @@ export default function OtpView({ email, onSuccess, onResend, isLoading, error }
 
   const handleChange = useCallback((index, value) => {
     const digit = value.replace(/\D/g, '').slice(-1);
-    const next = [...digits];
-    next[index] = digit;
-    setDigits(next);
-
-    if (digit && index < OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
-
-    if (digit && index === OTP_LENGTH - 1) {
-      const code = next.join('');
-      if (code.length === OTP_LENGTH) onSuccess(code);
-    }
-  }, [digits, onSuccess]);
+    setDigits((prev) => {
+      const next = [...prev];
+      next[index] = digit;
+      if (digit && index < OTP_LENGTH - 1) {
+        inputRefs.current[index + 1]?.focus();
+      }
+      if (digit && index === OTP_LENGTH - 1) {
+        const code = next.join('');
+        if (code.length === OTP_LENGTH) onSuccess(code);
+      }
+      return next;
+    });
+  }, [onSuccess]);
 
   const handleKeyDown = useCallback((index, e) => {
     if (e.key === 'Backspace') {
-      if (digits[index]) {
-        const next = [...digits];
-        next[index] = '';
-        setDigits(next);
-      } else if (index > 0) {
-        inputRefs.current[index - 1]?.focus();
-        const next = [...digits];
-        next[index - 1] = '';
-        setDigits(next);
-      }
+      setDigits((prev) => {
+        const next = [...prev];
+        if (prev[index]) {
+          next[index] = '';
+        } else if (index > 0) {
+          inputRefs.current[index - 1]?.focus();
+          next[index - 1] = '';
+        }
+        return next;
+      });
     } else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
     } else if (e.key === 'ArrowRight' && index < OTP_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-  }, [digits]);
+  }, []);
 
   const handlePaste = useCallback((e) => {
     e.preventDefault();
