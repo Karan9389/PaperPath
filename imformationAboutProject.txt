@@ -1,0 +1,26 @@
+POST /api/papers/:paperId/ask  { prompt: "..." }
+         │
+         ▼
+getGeminiEmbedding(prompt)  →  queryVector [3072 floats]
+         │
+         ▼
+paperModel.aggregate([
+  { $vectorSearch: {
+      index: "chunks_vector_index",
+      path: "chunks.embedding",
+      queryVector: [...],
+      filter: { _id: ObjectId(paperId) },   ← scoped to ONE paper
+      numCandidates: 50,
+      limit: 3
+  }},
+  { $project: { "chunks.text": 1, title: 1 } }
+])
+         │
+         ▼
+Top 3 relevant chunks returned from Atlas (no RAM loop)
+         │
+         ▼
+Gemini flash → final answer
+
+
+
