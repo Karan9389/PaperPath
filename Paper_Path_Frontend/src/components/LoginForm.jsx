@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Loader2, Zap } from 'lucide-react';
 
 export default function LoginForm({ onSubmit, isLoading, authError }) {
-  const [email, setEmail] = useState('demo@paperpath.com');
-  const [password, setPassword] = useState('demo1234');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const fillDemo = () => {
     setEmail('demo@paperpath.com');
