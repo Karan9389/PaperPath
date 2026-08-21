@@ -34,7 +34,14 @@ const protect = async (req, res, next) => {
             req.user = user;
             return next();
         } catch (error) {
-            console.error(error);
+            if (error.name === 'TokenExpiredError') {
+                return res.status(401).json({ message: 'Token expired, please log in again' });
+            }
+            if (error.name === 'JsonWebTokenError') {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            // Unexpected error — log the full details
+            console.error('[authMiddleware] Unexpected error:', error);
             return res.status(401).json({ message: 'Not authorized, token failed' });
         }
     }
