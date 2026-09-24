@@ -17,10 +17,14 @@ const toggleSavePaper = async (req, res) => {
             return res.json({ savedPapers: [] });
         }
 
+        const paperId = String(req.params.paperId || '');
+        if (!paperId) {
+            return res.status(400).json({ message: 'Paper ID is required' });
+        }
+
         const userId = String(req.user._id);
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             const library = getFallbackLibrary(userId);
-            const paperId = String(req.params.paperId);
             const isSaved = library.savedPapers.some((id) => String(id) === paperId);
 
             library.savedPapers = isSaved
@@ -33,9 +37,7 @@ const toggleSavePaper = async (req, res) => {
         const user = await User.findById(req.user._id);
         if (!user) return res.json({ savedPapers: [] });
 
-        const paperId = req.params.paperId;
-
-        const isSaved = user.savedPapers.includes(paperId);
+        const isSaved = user.savedPapers.some((id) => id.toString() === paperId);
 
         if (isSaved) {
             user.savedPapers = user.savedPapers.filter((id) => id.toString() !== paperId);
@@ -44,7 +46,7 @@ const toggleSavePaper = async (req, res) => {
         }
 
         await user.save();
-        return res.json({ savedPapers: user.savedPapers });
+        return res.json({ savedPapers: user.savedPapers.map((id) => id.toString()) });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
