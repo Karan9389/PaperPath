@@ -1,14 +1,38 @@
 import mongoose from 'mongoose';
 import User from '../models/user.js';
 
+const fallbackLibraryStore = new Map();
+
+const getFallbackLibrary = (userId) => {
+    const key = String(userId || 'guest');
+    if (!fallbackLibraryStore.has(key)) {
+        fallbackLibraryStore.set(key, { savedPapers: [], readHistory: [] });
+    }
+    return fallbackLibraryStore.get(key);
+};
+
 const toggleSavePaper = async (req, res) => {
     try {
-        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+        if (!req.user?._id) {
             return res.json({ savedPapers: [] });
         }
+
+        const userId = String(req.user._id);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            const library = getFallbackLibrary(userId);
+            const paperId = String(req.params.paperId);
+            const isSaved = library.savedPapers.some((id) => String(id) === paperId);
+
+            library.savedPapers = isSaved
+                ? library.savedPapers.filter((id) => String(id) !== paperId)
+                : [...library.savedPapers, paperId];
+
+            return res.json({ savedPapers: library.savedPapers });
+        }
+
         const user = await User.findById(req.user._id);
         if (!user) return res.json({ savedPapers: [] });
-        
+
         const paperId = req.params.paperId;
 
         const isSaved = user.savedPapers.includes(paperId);
@@ -28,9 +52,21 @@ const toggleSavePaper = async (req, res) => {
 
 const addPaperToHistory = async (req, res) => {
     try {
-        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+        if (!req.user?._id) {
             return res.json({ readHistory: [] });
         }
+
+        const userId = String(req.user._id);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            const library = getFallbackLibrary(userId);
+            const paperId = String(req.params.paperId);
+
+            library.readHistory = library.readHistory.filter((item) => String(item.paper) !== paperId);
+            library.readHistory.unshift({ paper: paperId, readAt: Date.now() });
+
+            return res.json({ readHistory: library.readHistory });
+        }
+
         const user = await User.findById(req.user._id);
         if (!user) return res.json({ readHistory: [] });
 
@@ -47,9 +83,22 @@ const addPaperToHistory = async (req, res) => {
 
 const getUserLibrary = async (req, res) => {
     try {
-        if (!req.user?._id || !mongoose.Types.ObjectId.isValid(req.user._id)) {
+        if (!req.user?._id) {
             return res.json({ savedPapers: [], readHistory: [] });
         }
+
+        const userId = String(req.user._id);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            const library = getFallbackLibrary(userId);
+            const savedPapers = (library.savedPapers || []).map((paperId) => ({ _id: String(paperId) }));
+            const readHistory = (library.readHistory || []).map((entry) => ({
+                _id: String(entry.paper),
+                readAt: entry.readAt || Date.now(),
+            }));
+
+            return res.json({ savedPapers, readHistory });
+        }
+
         const user = await User.findById(req.user._id)
             .populate({ path: 'savedPapers', select: 'title difficultyLevel abstract tags' })
             .populate({ path: 'readHistory.paper', select: 'title difficultyLevel abstract tags' });
