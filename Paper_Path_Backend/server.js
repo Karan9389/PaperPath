@@ -44,15 +44,18 @@ app.get('/', (req, res) =>{
 // Example of the correct async startup pattern
 const startServer = async () => {
     try {
-        // 1. Wait for the database to connect FIRST
-        await connectDB(); 
-        
-        // 2. THEN start the server
-        app.listen(3001, () => {
-            console.log('Server is running on port 3001');
+        const dbStatus = await connectDB();
+
+        if (dbStatus?.connected === false) {
+            console.warn('[Server] Continuing without MongoDB connectivity. Demo/fallback data is enabled.');
+        }
+
+        const port = Number(process.env.PORT || 3001);
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
         });
     } catch (error) {
-        console.error('Failed to connect to the database', error);
+        console.error('Failed to start the server', error);
     }
 };
 
