@@ -8,7 +8,8 @@ const connectDB = async () => {
         const mongoUrl = process.env.MONGO_DB_URL || process.env.MONGODB_URI;
 
         if (!mongoUrl) {
-            throw new Error("MongoDB connection string is not defined. Set MONGO_DB_URL in the .env file.");
+            console.warn("[DB] No MongoDB connection string configured. Starting in demo mode.");
+            return { connected: false };
         }
 
         if (mongoUrl.startsWith("mongodb+srv://")) {
@@ -18,11 +19,12 @@ const connectDB = async () => {
             }
         }
 
-        await mongoose.connect(mongoUrl, { family: 4 });
+        await mongoose.connect(mongoUrl, { family: 4, serverSelectionTimeoutMS: 5000 });
         console.log("Databse connected successfully");
-    }catch(error){
-        console.log(`Error ${error.message}`);
-        process.exit(1);
+        return { connected: true };
+    } catch (error) {
+        console.warn(`[DB] Connection failed: ${error.message}. Starting in demo mode.`);
+        return { connected: false };
     }
 };
 
