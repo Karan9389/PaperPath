@@ -59,7 +59,7 @@ graph TD
 
     subgraph Backend Services
         Backend --|Authenticates Users| AuthController[Auth Controller]
-        Backend --|Manages Papers & Reviews| PaperController[Paper & Review Controller]
+        Backend --|Manages Papers and Reviews| PaperController[Paper and Review Controller]
         Backend --|Handles AI Interactions| AIController[AI Controller]
         Backend --|User Management| UserController[User Controller]
     end
