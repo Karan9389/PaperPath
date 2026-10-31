@@ -55,7 +55,7 @@ PaperPath is built upon a robust and scalable technology stack, designed for per
 ```mermaid
 graph TD
     User[Web Browser React Frontend] -->|HTTP Requests| NGINX(NGINX Proxy / Load Balancer)
-    NGINX -->|API Calls (e.g., /api/auth, /api/papers, /api/ai)| Backend(Express.js / Node.js Backend)
+    NGINX -->|API Calls| Backend(Express.js / Node.js Backend)
 
     subgraph Backend Services
         Backend --|Authenticates Users| AuthController[Auth Controller]
