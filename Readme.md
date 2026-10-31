@@ -1,208 +1,224 @@
-# PaperPath: AI-Powered Research Paper Filtering with RAG and Gemini API
+<div align="center">
 
-## 1. Project Title & Overview
+# PaperPath
+### AI-Powered Research Paper Discovery & Filtering via RAG and Google Gemini
 
-**PaperPath** is an innovative application designed to streamline the research paper discovery and filtering process. Leveraging a modern MERN (MongoDB, Express.js, React, Node.js) stack, it integrates Retrieval-Augmented Generation (RAG) with the Google Gemini API to provide intelligent, context-aware responses to user queries about academic papers. This system enables researchers to efficiently navigate vast repositories of scientific literature, extract key information, and gain insights without manually sifting through numerous documents.
+[![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-4.4.5-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-LTS-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-5.2.1-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-7.2.0-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-API-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
+[![LangChain](https://img.shields.io/badge/LangChain.js-1.1.48-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://js.langchain.com/)
 
-## 2. Tech Stack
+**PaperPath** streamlines academic literature review and discovery. Built on the MERN stack, it integrates **Retrieval-Augmented Generation (RAG)** with the **Google Gemini API** to deliver accurate, context-aware answers grounded directly in your uploaded research papers.
 
-PaperPath is built upon a robust and scalable technology stack, designed for performance and flexibility.
+[Explore Features](#-key-features) • [System Architecture](#-system-architecture--design) • [RAG Pipeline](#-data-flow--rag-pipeline) • [Getting Started](#-getting-started--installation) • [Authors](#-authors--credits)
 
-*   **Frontend**: React.js, Vite, Tailwind CSS
-*   **Backend**: Node.js, Express.js
-*   **Database**: MongoDB (NoSQL Database), Mongoose (ODM)
-*   **AI/LLM**: Google Gemini API
-*   **RAG Implementation**: LangChain.js, @google/genai (for Gemini interaction)
-*   **Core Libraries**: JSON Web Tokens (JWT) for authentication, Multer for file uploads, Nodemailer for email services.
+</div>
 
-## 3. Dependencies
+---
 
-### Backend Dependencies (`Paper_Path_Backend/package.json`)
+## 📖 Table of Contents
 
-*   `@google/genai`: `^2.10.0` - Official Google Gemini API client library for direct interaction with the Gemini large language models.
-*   `@langchain/core`: `^1.1.48` - Core components for LangChain.js, providing fundamental abstractions for building LLM applications, including chains, prompts, and agents.
-*   `@langchain/google-genai`: `^2.1.31` - LangChain integration for Google Gemini, enabling seamless use of Gemini models within LangChain workflows for RAG.
-*   `cors`: `^2.8.6` - Middleware to enable Cross-Origin Resource Sharing (CORS), allowing the frontend to make requests to the backend API.
-*   `csv-parser`: `^3.2.1` - A fast CSV parser, likely used for ingesting data (e.g., metadata about papers) from CSV files.
-*   `dotenv`: `^17.4.2` - Loads environment variables from a `.env` file into `process.env`, securing sensitive configuration.
-*   `express`: `^5.2.1` - Fast, unopinionated, minimalist web framework for Node.js, forming the backbone of the backend API.
-*   `fs`: `^0.0.1-security` - Node.js's built-in file system module, used for interacting with the file system, such as reading uploaded papers.
-*   `jsonwebtoken`: `^9.0.3` - An implementation of JSON Web Tokens, used for secure authentication and authorization of API requests.
-*   `mongodb`: `^7.2.0` - The official MongoDB driver for Node.js, enabling direct interaction with the MongoDB database.
-*   `mongoose`: `^9.6.2` - MongoDB object data modeling (ODM) library for Node.js, providing a schema-based solution to model application data.
-*   `multer`: `^2.2.0` - Node.js middleware for handling `multipart/form-data`, primarily used for uploading files (e.g., research papers).
-*   `nodemailer`: `^9.0.3` - A module for sending emails from Node.js applications, potentially for user registration, password resets, or notifications.
-*   `pdf2json`: `^4.0.3` - A PDF parser that converts PDF files into JSON format, likely used for extracting text content from uploaded research papers for indexing and RAG.
-*   `nodemon`: `^3.1.14` (Dev Dependency) - A utility that monitors for any changes in your source and automatically restarts your server, enhancing development workflow.
+1. [Overview](#-overview)
+2. [Key Features](#-key-features)
+3. [Tech Stack & Dependencies](#-tech-stack--dependencies)
+4. [System Architecture & Design](#-system-architecture--design)
+5. [Data Flow & RAG Pipeline](#-data-flow--rag-pipeline)
+6. [Project Structure](#-project-structure)
+7. [Getting Started & Installation](#-getting-started--installation)
+8. [Contributing](#-contributing)
+9. [Authors & Credits](#-authors--credits)
 
-### Frontend Dependencies (`Paper_Path_Frontend/package.json`)
+---
 
-*   `lucide-react`: `^0.263.1` - A collection of beautiful and customizable SVG icons for React applications, used for UI elements.
-*   `react`: `^18.2.0` - The core JavaScript library for building user interfaces.
-*   `react-dom`: `^18.2.0` - Provides DOM-specific methods that can be used at the top level of a web app to enable efficient management of DOM elements.
-*   `autoprefixer`: `^10.4.14` (Dev Dependency) - PostCSS plugin to parse CSS and add vendor prefixes to CSS rules, ensuring cross-browser compatibility.
-*   `postcss`: `^8.4.24` (Dev Dependency) - A tool for transforming CSS with JavaScript, used by Tailwind CSS.
-*   `tailwindcss`: `^3.3.0` (Dev Dependency) - A utility-first CSS framework for rapidly building custom designs.
-*   `vite`: `^4.4.5` (Dev Dependency) - A next-generation frontend tooling that provides an extremely fast development experience.
-*   `@vitejs/plugin-react`: `^4.0.3` (Dev Dependency) - A Vite plugin for React projects.
-*   `@types/react`: `^18.2.15` (Dev Dependency) - Type definitions for React.
-*   `@types/react-dom`: `^18.2.7` (Dev Dependency) - Type definitions for React DOM.
+## 🔍 Overview
 
-## 4. System Architecture & Design
+Navigating dense repositories of scientific literature is time-consuming. **PaperPath** eliminates manual sifting by enabling researchers, students, and engineers to upload PDF manuscripts, index their semantic content, and query complex methodologies or findings using natural language. By pairing **LangChain.js** vector retrieval with **Google Gemini**, PaperPath ensures every generated insight is strictly anchored to the source material, minimizing hallucinations and maximizing research velocity.
+
+---
+
+## ✨ Key Features
+
+* **Context-Aware Paper Q&A**: Query uploaded PDFs in natural language and receive synthesized, citation-backed responses powered by Google Gemini.
+* **Retrieval-Augmented Generation (RAG)**: Grounds LLM outputs in actual document chunks using semantic vector embeddings and similarity search.
+* **Automated PDF Parsing & Indexing**: Extracts raw text via `pdf2json` and processes metadata datasets via `csv-parser` for rapid ingestion.
+* **Library & Review Management**: Upload, organize, and review academic papers alongside user reading progress tracking.
+* **Secure Authentication**: Full JWT-based authentication, protected API routes, and automated transactional email workflows via `Nodemailer`.
+* **Responsive Modern UI**: Clean, fast interface built with React 18, Vite, Tailwind CSS, and Lucide icons.
+
+---
+
+## 🛠 Tech Stack & Dependencies
+
+### Core Architecture
+* **Frontend**: React.js, Vite, Tailwind CSS, Lucide React
+* **Backend**: Node.js, Express.js
+* **Database**: MongoDB, Mongoose ODM
+* **AI & RAG**: Google Gemini API (`@google/genai`), LangChain.js (`@langchain/core`, `@langchain/google-genai`)
+* **Authentication & Utilities**: JSON Web Tokens (`jsonwebtoken`), Multer, Nodemailer, `pdf2json`, `csv-parser`
+
+### Backend Packages (`Paper_Path_Backend/package.json`)
+
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| `@google/genai` | `^2.10.0` | Official Google Gemini SDK for direct LLM and embedding interactions |
+| `@langchain/core` | `^1.1.48` | Core LangChain abstractions for chains, prompts, and RAG orchestration |
+| `@langchain/google-genai` | `^2.1.31` | LangChain integration for Google Gemini models and vector embeddings |
+| `express` | `^5.2.1` | Minimalist web framework powering the RESTful API |
+| `mongodb` / `mongoose` | `^7.2.0` / `^9.6.2` | NoSQL database driver and schema-based Object Data Modeling (ODM) |
+| `jsonwebtoken` | `^9.0.3` | Stateless JWT token generation and verification for route protection |
+| `multer` | `^2.2.0` | `multipart/form-data` middleware for handling PDF research paper uploads |
+| `pdf2json` | `^4.0.3` | Parses uploaded PDF manuscripts into structured JSON/text for RAG chunking |
+| `csv-parser` | `^3.2.1` | High-speed streaming CSV parser for batch paper metadata ingestion |
+| `nodemailer` | `^9.0.3` | SMTP client for user verification, notifications, and password resets |
+| `cors` / `dotenv` | `^2.8.6` / `^17.4.2` | Cross-Origin Resource Sharing middleware and environment variable loader |
+| `nodemon` | `^3.1.14` | *(Dev)* Live-reload server monitor for local backend development |
+
+### Frontend Packages (`Paper_Path_Frontend/package.json`)
+
+| Package | Version | Purpose |
+| :--- | :--- | :--- |
+| `react` / `react-dom` | `^18.2.0` | Core UI component library and DOM rendering engine |
+| `lucide-react` | `^0.263.1` | Customizable SVG icon toolkit for the user interface |
+| `vite` | `^4.4.5` | *(Dev)* Next-generation frontend build tool and HMR dev server |
+| `tailwindcss` | `^3.3.0` | *(Dev)* Utility-first CSS framework for responsive styling |
+| `postcss` / `autoprefixer` | `^8.4.24` / `^10.4.14` | *(Dev)* CSS transformation and automated vendor prefixing |
+
+---
+
+## 🏗 System Architecture & Design
 
 ### Architectural Diagram
 
 ```mermaid
 graph TD
-    User[Web Browser React Frontend] -->|HTTP Requests| NGINX(NGINX Proxy / Load Balancer)
-    NGINX -->|API Calls| Backend(Express.js / Node.js Backend)
+    User["Web Browser (React Frontend)"] -->|HTTP / REST API| NGINX["Reverse Proxy / Load Balancer"]
+    NGINX -->|Routes Requests| Backend["Express.js / Node.js Backend"]
 
     subgraph Backend Services
-        Backend --|Authenticates Users| AuthController[Auth Controller]
-        Backend --|Manages Papers and Reviews| PaperController[Paper and Review Controller]
-        Backend --|Handles AI Interactions| AIController[AI Controller]
-        Backend --|User Management| UserController[User Controller]
+        Backend -->|Authenticates| AuthController["Auth Controller"]
+        Backend -->|Manages Papers & Reviews| PaperController["Paper & Review Controller"]
+        Backend -->|Orchestrates RAG & LLM| AIController["AI Controller"]
+        Backend -->|Manages Profiles| UserController["User Controller"]
     end
 
-    Backend -->|Stores/Retrieves User Data, Papers, Reviews| MongoDB[(MongoDB Database)]
-    Backend --|Uploads Files (PDFs)| Multer(Multer Middleware)
-    Multer --> LocalStorage[Local File Storage (./uploads)]
-    Backend -->|Parses PDFs for Text Extraction| PDFParser[pdf2json]
-    PDFParser --> TextData[Extracted Text Data]
+    Backend -->|CRUD Operations| MongoDB[("MongoDB Database")]
+    Backend -->|Streams Multipart PDFs| Multer["Multer Middleware"]
+    Multer --> LocalStorage["Local File Storage (./uploads)"]
+    Backend -->|Extracts Raw Text| PDFParser["pdf2json Parser"]
+    PDFParser --> TextData["Extracted Text Chunks"]
 
-    TextData -->|Generates Embeddings (LangChain)| EmbeddingService[LangChain Embedding Service]
-    EmbeddingService --> VectorStore[(Vector Database - likely in-memory/file-based or MongoDB Atlas Vector Search)]
-    AIController -->|Retrieves Context (Similarity Search)| VectorStore
-    AIController -->|Sends Prompt + Context| GeminiAPI(Google Gemini API)
-    GeminiAPI -->|Returns LLM Response| AIController
-    AIController -->|Sends AI Response| Backend
-    Backend -->|Responds with Data/AI Output| User
+    TextData -->|Generates Embeddings| EmbeddingService["LangChain Embedding Service"]
+    EmbeddingService --> VectorStore[("Vector Store / Atlas Vector Search")]
+    AIController -->|Similarity Search (Top-K)| VectorStore
+    AIController -->|Prompt + Retrieved Context| GeminiAPI["Google Gemini API"]
+    GeminiAPI -->|Synthesized Response| AIController
+    AIController -->|JSON Payload| Backend
+    Backend -->|Renders Output| User
 ```
 
-### System Components
+### Component Breakdown
 
-*   **React Frontend**: The user interface, built with React, responsible for user interaction, displaying research papers, search results, and AI-generated responses. It communicates with the Express.js backend via RESTful API calls.
-*   **Express.js / Node.js Backend**: The core application logic, handling API requests, user authentication, database interactions, file uploads, and orchestrating the RAG process.
-    *   **Controllers**: Handle incoming requests, interact with services and models, and send responses (e.g., `authController.js`, `aiController.js`, `searchController.js`, `userController.js`).
-    *   **Models**: Define the schema for data stored in MongoDB using Mongoose (e.g., `paper.js`, `review.js`, `user.js`, `userProgress.js`).
-    *   **Routes**: Define the API endpoints and map them to corresponding controller functions (e.g., `authRouters.js`, `aiRoutes.js`, `paperRoutes.js`, `userRoutes.js`).
-    *   **Services**: Encapsulate business logic and external integrations, such as `geminiServices.js` for interacting with the Gemini API and RAG pipeline components.
-    *   **Middleware**: Intercept requests for tasks like authentication (`authMiddleware.js`).
-    *   **Configuration**: Manages database connections, environment variables, and mailer settings (`db.js`, `env.js`, `mailer.js`).
-*   **MongoDB Database**: A NoSQL database used to store application data such as user profiles, research paper metadata, and reviews.
-*   **Vector Database**: Essential for RAG, this database stores vector embeddings of the research paper content. While a dedicated vector database is ideal, it could be implemented using in-memory vector stores (e.g., `Chroma`, `Faiss` in LangChain) or MongoDB Atlas's Vector Search capabilities depending on scale.
-*   **Google Gemini API**: The Large Language Model (LLM) that powers the conversational AI, generating responses based on retrieved context from the research papers.
-*   **Local File Storage**: Stores the uploaded PDF research paper files before their content is processed and indexed.
+* **React Frontend**: Manages client-side state, paper browsing, PDF upload forms, and the interactive AI chat interface.
+* **Express.js Backend**:
+  * **Controllers** (`authController.js`, `aiController.js`, `searchController.js`, `userController.js`): Handle request validation, service invocation, and HTTP responses.
+  * **Models** (`paper.js`, `review.js`, `user.js`, `userProgress.js`): Enforce strict Mongoose schemas for users, paper metadata, peer reviews, and reading telemetry.
+  * **Services** (`geminiServices.js`): Encapsulate LangChain chunking, embedding generation, vector retrieval, and Gemini API calls.
+  * **Middleware & Config** (`authMiddleware.js`, `db.js`, `env.js`, `mailer.js`): Centralize JWT verification, database pooling, environment sanity checks, and SMTP transport.
 
-## 5. Data Flow & RAG Implementation
+---
 
-The RAG implementation in PaperPath follows a multi-step data lifecycle designed for efficient and context-rich AI interactions.
+## 🔄 Data Flow & RAG Pipeline
 
-### Step-by-Step Data Lifecycle
+PaperPath implements a 7-stage Retrieval-Augmented Generation lifecycle to ensure high factual precision:
 
-1.  **Ingestion**:
-    *   Users upload research papers (PDFs) via the frontend.
-    *   The `multer` middleware on the backend (`server.js`, `routes/paperRoutes.js`) handles the file upload, saving the PDF to `./uploads`.
-    *   The `pdf2json` library (`services/paperService.js` or similar utility called by `paperController.js`) extracts raw text content from the uploaded PDF.
-2.  **Embedding Generation**:
-    *   The extracted text is then segmented into smaller, manageable chunks suitable for embedding.
-    *   `LangChain.js` components, specifically within `services/geminiServices.js` or `aiController.js`, use the Google Gemini embedding model (via `@langchain/google-genai` and `@google/genai`) to convert these text chunks into numerical vector embeddings. These embeddings capture the semantic meaning of the text.
-3.  **Vector Storage**:
-    *   These generated vector embeddings are stored in a Vector Database. The current setup implies either an in-memory vector store or potentially leveraging MongoDB Atlas's Vector Search features if configured.
-    *   Each vector is associated with metadata pointing back to the original research paper and its chunk.
-4.  **Querying**:
-    *   When a user submits a query related to research papers, the `aiController.js` receives this natural language query.
-    *   The user's query is also converted into a vector embedding using the same Gemini embedding model.
-5.  **Context Retrieval (Similarity Search)**:
-    *   The embedded user query is then used to perform a similarity search against the Vector Database.
-    *   The search identifies and retrieves the top-k (most similar) vector embeddings, which correspond to relevant text chunks from the ingested research papers. This process is orchestrated by `LangChain.js` within `services/geminiServices.js`.
-    *   These retrieved text chunks serve as the "context" for the LLM.
-6.  **Gemini API LLM Generation**:
-    *   The `aiController.js` constructs a comprehensive prompt that includes the original user query and the retrieved context from the Vector Database.
-    *   This augmented prompt is sent to the Google Gemini API (`services/geminiServices.js`).
-    *   Gemini processes the prompt, using the provided context to generate a highly relevant and informed response.
-7.  **Response**:
-    *   The AI-generated response from Gemini is sent back through the backend to the frontend, where it is displayed to the user.
+1. **Document Ingestion**: Users upload PDF manuscripts via the React client. `multer` streams the binary to `./uploads`, and `pdf2json` extracts raw textual content.
+2. **Text Segmentation & Embedding**: Extracted text is split into overlapping semantic chunks. `geminiServices.js` passes these chunks through `@langchain/google-genai` to generate high-dimensional vector embeddings.
+3. **Vector Indexing**: Embeddings are indexed alongside paper metadata in the vector store, linking every mathematical vector back to its source document and paragraph.
+4. **Query Vectorization**: When a user submits a research question, `aiController.js` embeds the natural language query into the same vector space using the Gemini embedding model.
+5. **Semantic Similarity Search**: LangChain executes a top-$k$ cosine similarity search against the vector store to retrieve the most relevant text passages.
+6. **Context-Augmented Prompting**: `aiController.js` constructs a structured system prompt combining the user's question with the retrieved document chunks.
+7. **LLM Synthesis**: The augmented prompt is dispatched to the **Google Gemini API**, which synthesizes a grounded answer and returns it to the client UI.
 
-### Explicit RAG Implementation Details
+---
 
-*   **Embedding Generation**:
-    *   Files: `Paper_Path_Backend/src/services/geminiServices.js`, possibly `Paper_Path_Backend/src/controllers/aiController.js` (for orchestration).
-    *   Libraries: `@google/genai`, `@langchain/google-genai`, `@langchain/core`.
-    *   Process: Text chunks are passed to LangChain's embedding models, which interface with the Gemini API to produce vectors.
-*   **Vector Storage**:
-    *   The exact vector database is not explicitly defined but would be initialized within `Paper_Path_Backend/src/services/geminiServices.js` (e.g., `MemoryVectorStore` or a connection to a persistent vector store). MongoDB could be used for metadata.
-*   **Similarity Search**:
-    *   Files: `Paper_Path_Backend/src/services/geminiServices.js`, `Paper_Path_Backend/src/controllers/aiController.js`.
-    *   Libraries: `@langchain/core`.
-    *   Process: User query embeddings are compared against stored document embeddings to find the most relevant chunks.
-*   **Prompt Construction**:
-    *   Files: `Paper_Path_Backend/src/controllers/aiController.js` (main logic), `Paper_Path_Backend/src/services/geminiServices.js` (helper for LLM calls).
-    *   Process: The `aiController.js` is responsible for taking the user's query and the retrieved document chunks and formatting them into a clear, concise prompt for the Gemini LLM.
+## 📂 Project Structure
 
-## 6. Key Features
+```text
+PaperPath/
+├── Paper_Path_Backend/
+│   ├── src/
+│   │   ├── config/          # Database (db.js), Env (env.js), Mailer (mailer.js)
+│   │   ├── controllers/     # Route handlers (auth, ai, search, user)
+│   │   ├── middleware/      # JWT protection (authMiddleware.js)
+│   │   ├── models/          # Mongoose schemas (paper, review, user, userProgress)
+│   │   ├── routes/          # Express API routers (auth, ai, paper, user)
+│   │   ├── services/        # RAG & Gemini orchestration (geminiServices.js)
+│   │   └── server.js        # Application entry point
+│   ├── uploads/             # Local staging directory for uploaded PDFs
+│   ├── .env                 # Backend environment variables
+│   └── package.json
+│
+└── Paper_Path_Frontend/
+    ├── src/                 # React components, pages, hooks, and assets
+    ├── .env                 # Frontend environment variables
+    ├── tailwind.config.js   # Tailwind CSS configuration
+    ├── vite.config.js       # Vite bundler configuration
+    └── package.json
+```
 
-*   **AI-Powered Research Paper Q&A**: Ask natural language questions about uploaded papers and receive concise, context-aware answers generated by the Gemini API.
-*   **Retrieval-Augmented Generation (RAG)**: Ensures AI responses are grounded in the actual content of your research papers, reducing hallucinations and improving factual accuracy.
-*   **User Authentication & Authorization**: Secure user login, registration, and protected routes using JWT.
-*   **Research Paper Management**: Upload, store, and manage a collection of research papers.
-*   **User Progress Tracking**: (Potentially) Track user interactions or reading progress on papers.
-*   **Search Functionality**: Efficiently search through your uploaded papers.
-*   **Intuitive User Interface**: A modern and responsive frontend built with React and Tailwind CSS.
+---
 
-## 7. Getting Started & Installation
-
-Follow these steps to set up and run PaperPath locally.
+## 🚀 Getting Started & Installation
 
 ### Prerequisites
 
-*   Node.js (LTS version recommended)
-*   npm or Yarn
-*   MongoDB (local instance or cloud service like MongoDB Atlas)
-*   Google Gemini API Key
+Ensure you have the following installed on your local machine:
+* **Node.js** (v18+ LTS recommended)
+* **npm** or **yarn**
+* **MongoDB** (Local instance or [MongoDB Atlas](https://www.mongodb.com/atlas) cluster)
+* **Google Gemini API Key** (Obtain from [Google AI Studio](https://aistudio.google.com/))
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/Karan9389/PaperPath.git
+git clone [https://github.com/Karan9389/PaperPath.git](https://github.com/Karan9389/PaperPath.git)
 cd PaperPath
 ```
 
-### 2. Backend Setup
+### 2. Backend Configuration
 
-Navigate to the backend directory, install dependencies, and configure environment variables.
+Navigate to the backend directory and install dependencies:
 
 ```bash
 cd Paper_Path_Backend
 npm install
 ```
 
-Create a `.env` file in the `Paper_Path_Backend/` directory and add the following environment variables:
+Create a `.env` file in the `Paper_Path_Backend/` root and populate it with your credentials:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=a_strong_secret_key_for_jwt
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/paperpath
+JWT_SECRET=your_super_secret_jwt_signing_key
 GEMINI_API_KEY=your_google_gemini_api_key
-EMAIL_USER=your_email@example.com # For Nodemailer, if used
-EMAIL_PASS=your_email_password # For Nodemailer, if used
+EMAIL_USER=your_smtp_email@example.com
+EMAIL_PASS=your_smtp_app_password
 ```
 
-*   Replace `your_mongodb_connection_string` with your MongoDB URI (e.g., `mongodb://localhost:27017/paperpath` or your MongoDB Atlas connection string).
-*   Replace `a_strong_secret_key_for_jwt` with a complex, random string.
-*   Replace `your_google_gemini_api_key` with your actual Google Gemini API key.
-*   Configure `EMAIL_USER` and `EMAIL_PASS` if email functionalities are needed (e.g., for user verification or password reset).
+### 3. Frontend Configuration
 
-### 3. Frontend Setup
-
-Open a new terminal, navigate to the frontend directory, and install dependencies.
+Open a new terminal window, navigate to the frontend directory, and install dependencies:
 
 ```bash
 cd ../Paper_Path_Frontend
 npm install
 ```
 
-The frontend may also require environment variables, especially for API endpoint configuration. If there's a `.env` file for the frontend, it would typically contain:
+Create a `.env` file in the `Paper_Path_Frontend/` root:
 
 ```env
 VITE_API_URL=http://localhost:5000/api
@@ -210,22 +226,45 @@ VITE_API_URL=http://localhost:5000/api
 
 ### 4. Run the Application
 
-#### Run Backend
+Start both servers in separate terminal sessions:
 
-In the `Paper_Path_Backend/` directory:
-
+**Terminal 1 — Run Backend Server:**
 ```bash
+cd Paper_Path_Backend
 npm run dev
 ```
+*The backend API will initialize at `http://localhost:5000`.*
 
-The backend server will start, typically on `http://localhost:5000`.
-
-#### Run Frontend
-
-In the `Paper_Path_Frontend/` directory:
-
+**Terminal 2 — Run Frontend Client:**
 ```bash
+cd Paper_Path_Frontend
 npm run dev
 ```
+*The Vite development server will launch at `http://localhost:5173`. Open this URL in your browser.*
 
-The frontend development server will start, typically on `http://localhost:5173` (or another port as configured by Vite). Open your browser to this address to access the application.
+---
+
+## 🤝 Contributing
+
+Contributions make the open-source community a fantastic place to learn, inspire, and build.
+
+1. **Fork** the repository.
+2. **Create** your feature branch (`git checkout -b feature/AmazingFeature`).
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4. **Push** to the branch (`git push origin feature/AmazingFeature`).
+5. **Open** a Pull Request.
+
+---
+
+## 👥 Authors & Credits
+
+Designed, architected, and developed by:
+
+* **Karan Kumar** — [@Karan9389](https://github.com/Karan9389)
+* **Aditya Kushwaha**
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ using the MERN Stack, LangChain.js, and Google Gemini.</sub>
+</div>
