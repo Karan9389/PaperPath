@@ -95,29 +95,29 @@ Navigating dense repositories of scientific literature is time-consuming. **Pape
 
 ```mermaid
 graph TD
-    User["Web Browser (React Frontend)"] -->|HTTP / REST API| NGINX["Reverse Proxy / Load Balancer"]
-    NGINX -->|Routes Requests| Backend["Express.js / Node.js Backend"]
+    User["Web Browser (React Frontend)"] -->|"HTTP / REST API"| NGINX["Reverse Proxy / Load Balancer"]
+    NGINX -->|"Routes Requests"| Backend["Express.js / Node.js Backend"]
 
-    subgraph Backend Services
-        Backend -->|Authenticates| AuthController["Auth Controller"]
-        Backend -->|Manages Papers & Reviews| PaperController["Paper & Review Controller"]
-        Backend -->|Orchestrates RAG & LLM| AIController["AI Controller"]
-        Backend -->|Manages Profiles| UserController["User Controller"]
+    subgraph Backend_Services ["Backend Services"]
+        Backend -->|"Authenticates"| AuthController["Auth Controller"]
+        Backend -->|"Manages Papers & Reviews"| PaperController["Paper & Review Controller"]
+        Backend -->|"Orchestrates RAG & LLM"| AIController["AI Controller"]
+        Backend -->|"Manages Profiles"| UserController["User Controller"]
     end
 
-    Backend -->|CRUD Operations| MongoDB[("MongoDB Database")]
-    Backend -->|Streams Multipart PDFs| Multer["Multer Middleware"]
+    Backend -->|"CRUD Operations"| MongoDB[("MongoDB Database")]
+    Backend -->|"Streams Multipart PDFs"| Multer["Multer Middleware"]
     Multer --> LocalStorage["Local File Storage (./uploads)"]
-    Backend -->|Extracts Raw Text| PDFParser["pdf2json Parser"]
+    Backend -->|"Extracts Raw Text"| PDFParser["pdf2json Parser"]
     PDFParser --> TextData["Extracted Text Chunks"]
 
-    TextData -->|Generates Embeddings| EmbeddingService["LangChain Embedding Service"]
+    TextData -->|"Generates Embeddings"| EmbeddingService["LangChain Embedding Service"]
     EmbeddingService --> VectorStore[("Vector Store / Atlas Vector Search")]
-    AIController -->|Similarity Search (Top-K)| VectorStore
-    AIController -->|Prompt + Retrieved Context| GeminiAPI["Google Gemini API"]
-    GeminiAPI -->|Synthesized Response| AIController
-    AIController -->|JSON Payload| Backend
-    Backend -->|Renders Output| User
+    AIController -->|"Similarity Search (Top-K)"| VectorStore
+    AIController -->|"Prompt + Retrieved Context"| GeminiAPI["Google Gemini API"]
+    GeminiAPI -->|"Synthesized Response"| AIController
+    AIController -->|"JSON Payload"| Backend
+    Backend -->|"Renders Output"| User
 ```
 
 ### Component Breakdown
